@@ -5,27 +5,27 @@ using UnityEngine;
 public class GizmoDrawing : MonoBehaviour
 {
     [Range(1, 100)]
-    public int width;
+    public int width;   // Max width of the canvas
     [Range(1, 100)]
-    public int height;
+    public int height;  // Max height of the canvas
 
     [Range(1, 100)]
-    public int tileSize;
+    public int tileSize;    // Size of each tile on the canvas
 
-    private int[,] positions;
+    public bool[,] mapValue;   // Seed
 
     private void Start()
     {
-        positions = new int[width, height];
-        generateRandomPattern(positions);
+        mapValue = new bool[width,height];
+        generateRandomPattern();
     }
     private void OnDrawGizmosSelected()
     {
-        if(positions != null)
+        if (mapValue != null)
             for (int i = 0; i < width; i++)
                 for(int j = 0; j < height; j++)
                 {
-                    if (positions[i,j] == 0)
+                    if (mapValue[i,j])
                         Gizmos.color = Color.black;
                     else 
                         Gizmos.color = Color.white;
@@ -33,10 +33,10 @@ public class GizmoDrawing : MonoBehaviour
                 }
 
     }
-    private void generateRandomPattern(int[,] matrix)
+    public void generateRandomPattern()
     {
         for (int i = 0; i < width; i++)
             for (int j = 0; j < height; j++)
-                    positions[i, j] = UnityEngine.Random.Range(0, 2);
+                    this.mapValue[i, j] = UnityEngine.Random.Range(0, 2) == 1;
     }
 }
