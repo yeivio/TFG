@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEditor;
 
-
+[ExecuteInEditMode]
 public class GizmoDrawing : MonoBehaviour
 {
 
@@ -53,7 +53,6 @@ public class GizmoDrawing : MonoBehaviour
                 }
     }
     public void GenerateCellular(){
-        Debug.Log("s" + seed);
         if(Int32.TryParse(this.seed , out int parsedSeed)) { 
             this.mapValue = this.cellularAutomata.
                 Generate(this.width, this.height, this.chanceToStartAsWall, this.numberSteps, this.MIN_CONVERSION_WALL, this.MIN_CONVERSION_BLANK, parsedSeed);
@@ -62,6 +61,14 @@ public class GizmoDrawing : MonoBehaviour
                 Generate(this.width, this.height, this.chanceToStartAsWall, this.numberSteps, this.MIN_CONVERSION_WALL, this.MIN_CONVERSION_BLANK);
         }
 
+        this.seed = this.cellularAutomata.seed;
+    }
+
+
+    public void GenerateRandomCellular()
+    {
+        this.mapValue = this.cellularAutomata.
+                Generate(this.width, this.height, this.chanceToStartAsWall, this.numberSteps, this.MIN_CONVERSION_WALL, this.MIN_CONVERSION_BLANK);
         this.seed = this.cellularAutomata.seed;
     }
 }
@@ -75,10 +82,14 @@ public class ScriptEditor : Editor
         GizmoDrawing gizmoDrawing = (GizmoDrawing)target;
         
 
-        DrawDefaultInspector(); // Draw all public variables
-        
+        DrawDefaultInspector(); // Draw all public variables        
         if (GUILayout.Button("Generate cellular automata")) {
             gizmoDrawing.GenerateCellular();
+        }
+
+        if (GUILayout.Button("Generate random cellular automata"))
+        {
+            gizmoDrawing.GenerateRandomCellular();
         }
     }
 }

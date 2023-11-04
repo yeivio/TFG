@@ -25,7 +25,6 @@ public class CellularAutomata
         this.heightMap = height;
         map = new bool[width, height];
         this.seed = seed.ToString();
-        Debug.Log("llega" + seed);
         GenerateSeed(seed);    
         GenerateRandomStart();
 
@@ -88,7 +87,7 @@ public class CellularAutomata
                 }
                 else
                 {
-                    if (numWalls > MIN_CONVERSION_BLANK)
+                    if (numWalls > MIN_CONVERSION_BLANK || numWalls == 0)
                         copyMap[x, y] = true;
                     else
                         copyMap[x, y] = false;
@@ -104,7 +103,6 @@ public class CellularAutomata
         int tempSeed = (int)DateTime.Now.Ticks;
         if (seed == -1) // No seed 
         {
-            Debug.Log("Se resetea la seed" + tempSeed);
             UnityEngine.Random.InitState(tempSeed);
             this.seed = tempSeed.ToString();
         }
