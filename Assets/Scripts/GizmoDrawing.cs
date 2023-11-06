@@ -31,7 +31,7 @@ public class GizmoDrawing : MonoBehaviour
 
     private void OnEnable()
     {
-        cellularAutomata = new CellularAutomata();
+        cellularAutomata = new CellularAutomataEmptyFilling();
     }
 
     private void OnDrawGizmosSelected()
