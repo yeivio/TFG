@@ -6,6 +6,9 @@ using UnityEditor;
 public class GizmoDrawing : MonoBehaviour
 {
 
+    // True es Pared
+    // False es Libre
+
     #region Gizmo Settings
     [Header("DRAWING OPTIONS")]
     [Range(1, 100)]
@@ -17,12 +20,7 @@ public class GizmoDrawing : MonoBehaviour
     #endregion
 
     #region Cellular Automata Settings
-    /*[Header("OPTIONS FOR CELLULAR AUTOMATA")]
-    public float chanceToStartAsWall = .45f; // Chance to start as a Wall
-    public int numberSteps = 5; // Number of iterations
-    public int MIN_CONVERSION_WALL = 3; // Min number of walls the cell must be surrounded to become a wall
-    public int MIN_CONVERSION_BLANK = 5; // Min number of empty the cell must be surrounded to become an empty
-    public int seed;*/
+    
     [Header("OPTIONS FOR CELLULAR AUTOMATA")]
     public float chanceToStartAsWall; // Chance to start as a Wall
     public int numberSteps; // Number of iterations
@@ -71,7 +69,9 @@ public class GizmoDrawing : MonoBehaviour
 
     public void GenerateBSP()
     {
-        
+        BSPTree tree = new BSPTree();
+        this.mapValue = tree.Generate(this.width, this.height, seed);
+        this.seed = tree.getSeed();
     }
 
 }
