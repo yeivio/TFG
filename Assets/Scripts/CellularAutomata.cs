@@ -1,18 +1,12 @@
 using System;
 using UnityEngine;
 
-public class CellularAutomata
+public class CellularAutomata : GenerationAlgorithm
 {
     private float chanceToStartAsWall = .45f; // Chance to start as a Wall
     private float numberSteps = 5; // Number of iterations
     protected int MIN_CONVERSION_WALL = 3; // Min number of walls the cell must be surrounded to become a wall
     protected int MIN_CONVERSION_BLANK = 5; // Min number of empty the cell must be surrounded to become an empty
-
-    protected bool[,] map; // False == Empty | True == Wall
-    protected int widthMap;
-    protected int heightMap;
-
-    public string seed;
 
 
     public virtual bool[,] Generate(int width, int height, float wallStart, int numberSteps, int conversionWall, int conversionBlank, int seed = -1)
@@ -25,7 +19,7 @@ public class CellularAutomata
         this.heightMap = height;
         map = new bool[width, height];
         this.seed = seed.ToString();
-        GenerateSeed(seed);    
+        GenerateSeed(seed);
         GenerateRandomStart();
 
         for (int i = 0; i < this.numberSteps; i++)
@@ -39,7 +33,7 @@ public class CellularAutomata
     {
         for (int x = 0; x < widthMap; x++) // Ancho de filas
             for (int y = 0; y < heightMap; y++) // Ancho de columnas
-                if (UnityEngine.Random.Range(0.0f,1.0f) < chanceToStartAsWall)
+                if (UnityEngine.Random.Range(0.0f,1.0f) <= chanceToStartAsWall)
                     map[x,y] = true;
         
     }
@@ -95,17 +89,5 @@ public class CellularAutomata
         }
         this.map = copyMap;
         return copyMap;
-    }
-
-    private void GenerateSeed(int seed = -1)
-    {
-        int tempSeed = (int)DateTime.Now.Ticks;
-        if (seed == -1) // No seed 
-        {
-            UnityEngine.Random.InitState(tempSeed);
-            this.seed = tempSeed.ToString();
-        }
-        else
-            UnityEngine.Random.InitState(seed);
     }
 }
