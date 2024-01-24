@@ -1,63 +1,65 @@
+using System.Collections;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI.Table;
 
 
 public class BSPTree : GenerationAlgorithm
 {
-    
-    public bool[,] Generate(int width, int height, int seed = -1)
+
+    public bool[,] Generate(int numColumns, int numRows, int min_room_width, int min_room_height, int seed = -1)
     {
-        this.widthMap = width;
-        this.heightMap = height;
-        map = new bool[width, height];
+        this.widthMap = numColumns;
+        this.heightMap = numRows;
+        map = new bool[heightMap, widthMap];
         this.seed = seed.ToString();
         GenerateSeed(seed);
-        return new RoomNode(map).getMap();
+        
+        return new RoomNode(map, min_room_width, min_room_height).getMap().ToBoolMatrix(); 
     }
-
-
-
 }
 
 
 public class RoomNode
 {
-    private float min_room_width = 49;
-    private float min_room_height = 49;
+    private int min_room_width;
+    private int min_room_height;
 
     private RoomNode leftNode;
     private RoomNode rightNode;
 
-    private bool[,] spaceContext;
+    private Dungeon spaceContext;
 
     private static int nod = 0;
     private int id;
-    public RoomNode(bool[,] spaceCtx)
+    public RoomNode(bool[,] spaceCtx, int min_room_width, int min_room_height)
     {
+        this.min_room_height = min_room_height;
+        this.min_room_width = min_room_width;
+        //Debug.Log("Me llega spaceCtx de dimensiones:"+ spaceCtx.GetLength(0) + "X" + spaceCtx.GetLength(1));
         
-        this.spaceContext = spaceCtx;
+        this.spaceContext = new Dungeon(spaceCtx);
         id = nod;
-
-        Debug.Log("nodeCounter:" + nod);
         nod++;
-
-        
+        //Debug.Log("Soy el nodo:" + id + "Y mis dimensiones son:" + spaceContext.GetRowNum() +"X" +spaceContext.GetColumnNum());
+        //Debug.Log(((float)spaceContext.GetHeight() / 2));
         //If there isnt enough space for a room, then he is a leaf
-        if (spaceContext.GetLength(0) / 2 > min_room_width)
+
+        if (((float)spaceContext.GetRowNum() / 2) > min_room_height||
+            ((float)spaceContext.GetColumnNum() / 2) > min_room_width)
         {
-            Split();
+            this.Split();
         }
         else
         {
-            // Debug.Log("[" + id + "]Nazco y Soy hoja:" + spaceContext.GetLength(0) +"," + spaceContext.GetLength(1));
+            //Debug.Log("[" + id + "]Soy una:" + spaceContext.GetColumnSize() + "X" + spaceContext.GetRowSize());
 
-            //Draw room
-            for(int i = 0; i < spaceContext.GetLength(0); i++)
+            //Draw room when you can't divide
+            for (int i = 0; i < spaceContext.GetRowNum(); i++)
             {
-                for(int j = 0; j < spaceContext.GetLength(1); j++)
+                for(int j = 0; j < spaceContext.GetColumnNum(); j++)
                 {
-                    if(i != 0 && i != spaceContext.GetLength(0)-1 &&
-                        j != 0 && j != spaceContext.GetLength(1)-1)
-                    this.spaceContext[i, j] = true;
+                    this.spaceContext.SetValor((i*spaceContext.GetColumnNum())+j, true);
                 }
             }
         }
@@ -69,79 +71,83 @@ public class RoomNode
     {
 
         // Calculate if we are getting an horizontal or vertical split 
-        bool splitHorizonal = false;
-        if ((spaceContext.GetLength(0) / spaceContext.GetLength(1)) < 1)
-        {
-            // More width than height
-            splitHorizonal = false;
-
-        }
-        else if ((spaceContext.GetLength(0) / spaceContext.GetLength(1)) > 1)
-        {
-            // More height than width
-            splitHorizonal = true;
-        }
-        else
+        bool splitHorizonal;
+        if(((float)spaceContext.GetRowNum() / 2) > min_room_height &&
+            ((float)spaceContext.GetColumnNum() / 2) > min_room_width)
         {
             splitHorizonal = Random.Range(0.0f, 1.0f) > 0.5;    //Random election
         }
-
-        splitHorizonal = true;
+        else 
+        { 
+            splitHorizonal = ((float)spaceContext.GetRowNum() / 2) > min_room_height;
+        }
+        
+        //Debug.Log("Horizontal?" + splitHorizonal);
 
         if(splitHorizonal)
         {
-            int splitLoc_Height = (int) Random.Range(min_room_height, spaceContext.GetLength(0) - min_room_height);
-            //Debug.Log("[" + id + "]Se splitea en:" + (splitLoc_Height+1));
+            int splitLoc_Height = (int) Random.Range(min_room_height, spaceContext.GetRowNum() - min_room_height);
+            //Debug.Log("Corte en:" + splitLoc_Height);
+            //Debug.Log("Se va a crear izq:" + splitLoc_Height + "X" + spaceContext.GetColumnNum());
+            //Debug.Log("Se va a crear der:" + (spaceContext.GetRowNum() - splitLoc_Height - 1) + "X" + spaceContext.GetColumnNum());
+            leftNode = new RoomNode(new bool[splitLoc_Height, spaceContext.GetColumnNum()], min_room_width,min_room_height);
+            rightNode = new RoomNode(new bool[spaceContext.GetRowNum() - splitLoc_Height - 1, spaceContext.GetColumnNum()], min_room_width, min_room_height);
 
-            //Debug.Log("[" + id + "]Matrices divididas:" + (splitLoc_Height+1) + "," + spaceContext.GetLength(1));
-            leftNode = new RoomNode(new bool[splitLoc_Height, spaceContext.GetLength(1)]);
-            rightNode = new RoomNode(new bool[spaceContext.GetLength(0) - splitLoc_Height, spaceContext.GetLength(1)]);
-
-            Debug.Log("[" + id + "]voy a reconstruir");
-            for (int i = 0; i < spaceContext.GetLength(0); i++)
+            //Debug.Log("[" + id + "]voy a reconstruir" + spaceContext.GetRowNum() + "x" + spaceContext.GetColumnNum());
+            for (int i = 0; i < spaceContext.GetRowNum(); i++)
             {
-                for(int j = 0; j < spaceContext.GetLength(1); j++)
+                for (int j = 0; j < spaceContext.GetColumnNum(); j++)
                 {
+                    if (i == splitLoc_Height)
+                        i++;
+
                     if (i < splitLoc_Height)
                     {
-                        this.spaceContext[i, j] = leftNode.spaceContext[i, j];
+                        //Debug.Log("[" + i + "," + j + "] Va por izq");
+                        this.spaceContext.SetValor(i,j, leftNode.spaceContext.ToBoolMatrix()[i,j]);
                     }
                     else
                     {
-                        this.spaceContext[i, j] = rightNode.spaceContext[i - splitLoc_Height, j];
+                        //Debug.Log("[" + i + "," + j + "]Va por der, se busca:[" + (i-splitLoc_Height-1) + "," + j + "]");
+                        this.spaceContext.SetValor(i, j, rightNode.spaceContext.ToBoolMatrix()[i-splitLoc_Height-1, j]);
                     }
                 }
             }
+
         }
         else
         {
-            int splitLoc_Width = (int) Random.Range(min_room_width, spaceContext.GetLength(0) - min_room_width);
-            leftNode = new RoomNode(new bool[0, splitLoc_Width]);
-            rightNode = new RoomNode(new bool[splitLoc_Width, spaceContext.GetLength(1) - splitLoc_Width]);
+            int splitLoc_Width = (int)Random.Range(min_room_width, spaceContext.GetColumnNum() - min_room_width);
+            //Debug.Log("Corte en:" + splitLoc_Width);
+            //Debug.Log("Se va a crear izq:" + spaceContext.GetRowNum() + "X" + splitLoc_Width);
+            //Debug.Log("Se va a crear der:" + spaceContext.GetRowNum() + "X" + (spaceContext.GetColumnNum() - splitLoc_Width - 1));
+
+            leftNode = new RoomNode(new bool[spaceContext.GetRowNum(), splitLoc_Width], min_room_width, min_room_height);
+            rightNode = new RoomNode(new bool[spaceContext.GetRowNum(), spaceContext.GetColumnNum() - splitLoc_Width - 1], min_room_width, min_room_height);
+
+            for (int i = 0; i < spaceContext.GetRowNum(); i++)
+            {
+                for (int j = 0; j < spaceContext.GetColumnNum(); j++)
+                {
+                    if (j == splitLoc_Width)
+                        j++;
+
+                    if (j < splitLoc_Width)
+                    {
+                        //Debug.Log("[" + i + "," + j + "] Va por izq");
+                        this.spaceContext.SetValor(i, j, leftNode.spaceContext.ToBoolMatrix()[i, j]);
+                    }
+                    else
+                    {
+                        //Debug.Log("[" + i + "," + j + "]Va por der, se busca:[" + (i-splitLoc_Height-1) + "," + j + "]");
+                        this.spaceContext.SetValor(i, j, rightNode.spaceContext.ToBoolMatrix()[i, j - splitLoc_Width - 1]);
+                    }
+                }
+            }
         }     
     }
 
-    public bool[,] getMap() {
+    public Dungeon getMap() {
         return this.spaceContext; 
-    }
-}
-
-
-
-public class Room
-{
-    private float height, width;
-    private int x, y;
-    public float getWidth() { return height; }
-    public float getHeight() { return width; }
-    public int getX() { return x; }
-    public int getY() { return y; }
-
-    public Room(int x, int y, float width, float height)
-    {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
     }
 }

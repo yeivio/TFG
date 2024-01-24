@@ -11,10 +11,9 @@ public class GizmoDrawing : MonoBehaviour
 
     #region Gizmo Settings
     [Header("DRAWING OPTIONS")]
+    public int columnNum;   // Number of columns in the map
     [Range(1, 100)]
-    public int width;   // Max width of the canvas
-    [Range(1, 100)]
-    public int height;  // Max height of the canvas
+    public int rowNum;  // Number of rows in the map
     [Range(1, 100)]
     public int tileSize;    // Size of each tile on the canvas
     #endregion
@@ -29,6 +28,13 @@ public class GizmoDrawing : MonoBehaviour
     public int seed;
     #endregion
 
+    #region BSPTree Settings
+
+    [Header("OPTIONS FOR BSPTree")]
+    public int min_room_width;
+    public int min_room_height;
+    #endregion
+
 
     public bool[,] mapValue;   // Seed
 
@@ -40,21 +46,28 @@ public class GizmoDrawing : MonoBehaviour
     private void DrawMap()
     {
         if (mapValue != null)
-            for (int i = 0; i < width; i++)
-                for (int j = 0; j < height; j++)
+            for (int i = 0; i < columnNum; i++)
+                for (int j = 0; j < rowNum; j++)
                 {
-                    if (mapValue[i, j])
-                        Gizmos.color = Color.black;
-                    else
-                        Gizmos.color = Color.white;
-                    Gizmos.DrawCube(new Vector3(tileSize * i, tileSize * j, 0), new Vector3(tileSize, tileSize, 1));
+                    try
+                    {
+                        if (mapValue[j, i])
+                            Gizmos.color = Color.black;
+                        else
+                            Gizmos.color = Color.white;
+                        Gizmos.DrawCube(new Vector3(tileSize * i+0.5f, tileSize * j + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
+                    }catch
+                    {
+                        Gizmos.color = Color.gray;
+                        Gizmos.DrawCube(new Vector3(tileSize * i + 0.5f, tileSize * j + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
+                    }
                 }
     }
     public void GenerateCellular()
     {
         CellularAutomata cellularAutomata = new CellularAutomata();
         this.mapValue = 
-            cellularAutomata.Generate(this.width, this.height, chanceToStartAsWall, numberSteps, MIN_CONVERSION_WALL, MIN_CONVERSION_BLANK, seed);
+            cellularAutomata.Generate(this.columnNum, this.rowNum, chanceToStartAsWall, numberSteps, MIN_CONVERSION_WALL, MIN_CONVERSION_BLANK, seed);
     }
 
 
@@ -62,7 +75,7 @@ public class GizmoDrawing : MonoBehaviour
     {
         CellularAutomata cellularAutomata = new CellularAutomata();
         this.mapValue = cellularAutomata.
-                Generate(this.width, this.height, chanceToStartAsWall, numberSteps, MIN_CONVERSION_WALL, MIN_CONVERSION_BLANK);
+                Generate(this.columnNum, this.rowNum, chanceToStartAsWall, numberSteps, MIN_CONVERSION_WALL, MIN_CONVERSION_BLANK);
         this.seed = cellularAutomata.getSeed();
         return cellularAutomata.getSeed();
     }
@@ -70,7 +83,7 @@ public class GizmoDrawing : MonoBehaviour
     public void GenerateBSP()
     {
         BSPTree tree = new BSPTree();
-        this.mapValue = tree.Generate(this.width, this.height, seed);
+        this.mapValue = tree.Generate(this.columnNum, this.rowNum, min_room_width, min_room_height, seed);
         this.seed = tree.getSeed();
     }
 
@@ -85,7 +98,10 @@ public class ScriptEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        
+        GizmoDrawing gizmoDrawing = (GizmoDrawing)target;
+        gizmoDrawing.columnNum = EditorGUILayout.IntSlider("Number of columns", gizmoDrawing.columnNum, 0, 100);
+        gizmoDrawing.rowNum = EditorGUILayout.IntSlider("Number of rows", gizmoDrawing.rowNum, 0, 100);
+        gizmoDrawing.tileSize = EditorGUILayout.IntSlider("Tile Size", gizmoDrawing.tileSize, 0, 100);
         //DrawDefaultInspector(); // Draw all public variables
         EditorGUILayout.BeginVertical();
         currentSelected = GUILayout.SelectionGrid(currentSelected, tab_names,2);
@@ -131,6 +147,10 @@ public class ScriptEditor : Editor
     private void TabBSPTree()
     {
         GizmoDrawing gizmoDrawing = gizmoDrawing = (GizmoDrawing)target;
+        gizmoDrawing.min_room_width = EditorGUILayout.IntField("Min Room Width", gizmoDrawing.min_room_width);
+        gizmoDrawing.min_room_height= EditorGUILayout.IntField("Min Room Height", gizmoDrawing.min_room_height);
+
+
         if (GUILayout.Button("Generate BSP"))
         {
             gizmoDrawing.GenerateBSP();

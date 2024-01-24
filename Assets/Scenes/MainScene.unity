@@ -301,14 +301,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b243a9bb67dc0b42b743dac2c594696, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 100
-  height: 100
+  width: 10
+  height: 10
   tileSize: 1
   chanceToStartAsWall: 0.6
   numberSteps: 14
   MIN_CONVERSION_WALL: 5
   MIN_CONVERSION_BLANK: 4
-  seed: 2022785582
+  seed: -172680796
+  min_room_width: 4
+  min_room_height: 4
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
