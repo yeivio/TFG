@@ -32,7 +32,9 @@ public class GizmoDrawing : MonoBehaviour
 
     [Header("OPTIONS FOR BSPTree")]
     public int min_room_width;
-    public int min_room_height;
+    public int max_room_width;
+    public int min_room_height;    
+    public int max_room_height;
     #endregion
 
 
@@ -83,7 +85,7 @@ public class GizmoDrawing : MonoBehaviour
     public void GenerateBSP()
     {
         BSPTree tree = new BSPTree();
-        this.mapValue = tree.Generate(this.columnNum, this.rowNum, min_room_width, min_room_height, seed);
+        this.mapValue = tree.Generate(this.columnNum, this.rowNum, min_room_width, min_room_height,max_room_width, max_room_height, seed);
         this.seed = tree.getSeed();
     }
 
@@ -148,7 +150,11 @@ public class ScriptEditor : Editor
     {
         GizmoDrawing gizmoDrawing = gizmoDrawing = (GizmoDrawing)target;
         gizmoDrawing.min_room_width = EditorGUILayout.IntField("Min Room Width", gizmoDrawing.min_room_width);
+        gizmoDrawing.max_room_width = EditorGUILayout.IntField("Max Room Width", gizmoDrawing.max_room_width);
+
         gizmoDrawing.min_room_height= EditorGUILayout.IntField("Min Room Height", gizmoDrawing.min_room_height);
+        gizmoDrawing.max_room_height = EditorGUILayout.IntField("Max Room Height", gizmoDrawing.max_room_height);
+
 
 
         if (GUILayout.Button("Generate BSP"))
