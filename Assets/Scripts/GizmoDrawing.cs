@@ -16,6 +16,7 @@ public class GizmoDrawing : MonoBehaviour
     public int rowNum;  // Number of rows in the map
     [Range(1, 100)]
     public int tileSize;    // Size of each tile on the canvas
+    public float executionTime;
     #endregion
 
     #region Cellular Automata Settings
@@ -68,25 +69,54 @@ public class GizmoDrawing : MonoBehaviour
     public void GenerateCellular()
     {
         CellularAutomata cellularAutomata = new CellularAutomata();
+        var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
         this.mapValue = 
             cellularAutomata.Generate(this.columnNum, this.rowNum, chanceToStartAsWall, numberSteps, MIN_CONVERSION_WALL, MIN_CONVERSION_BLANK, seed);
+        watch.Stop();
+        executionTime = watch.ElapsedMilliseconds;
     }
 
 
     public int GenerateRandomCellular()
     {
+        
         CellularAutomata cellularAutomata = new CellularAutomata();
+        var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
         this.mapValue = cellularAutomata.
                 Generate(this.columnNum, this.rowNum, chanceToStartAsWall, numberSteps, MIN_CONVERSION_WALL, MIN_CONVERSION_BLANK);
+        watch.Stop();
+        executionTime = watch.ElapsedMilliseconds;
         this.seed = cellularAutomata.getSeed();
         return cellularAutomata.getSeed();
+        
     }
 
     public void GenerateBSP()
-    {
+    { 
+
         BSPTree tree = new BSPTree();
+        var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
         this.mapValue = tree.Generate(this.columnNum, this.rowNum, min_room_width, min_room_height,max_room_width, max_room_height, seed);
+        watch.Stop();
+        executionTime = watch.ElapsedMilliseconds;
         this.seed = tree.getSeed();
+
+        
+
+    }
+
+    public void GenerateRandomBSP()
+    {
+        
+
+        BSPTree tree = new BSPTree();
+        var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
+        this.mapValue = tree.Generate(this.columnNum, this.rowNum, min_room_width, min_room_height, max_room_width, max_room_height);
+        watch.Stop();
+        executionTime = watch.ElapsedMilliseconds;
+        this.seed = tree.getSeed();
+
+       
     }
 
 }
@@ -104,6 +134,7 @@ public class ScriptEditor : Editor
         gizmoDrawing.columnNum = EditorGUILayout.IntSlider("Number of columns", gizmoDrawing.columnNum, 0, 100);
         gizmoDrawing.rowNum = EditorGUILayout.IntSlider("Number of rows", gizmoDrawing.rowNum, 0, 100);
         gizmoDrawing.tileSize = EditorGUILayout.IntSlider("Tile Size", gizmoDrawing.tileSize, 0, 100);
+        EditorGUILayout.FloatField("Execution time (ms)", gizmoDrawing.executionTime);
         //DrawDefaultInspector(); // Draw all public variables
         EditorGUILayout.BeginVertical();
         currentSelected = GUILayout.SelectionGrid(currentSelected, tab_names,2);
@@ -155,11 +186,15 @@ public class ScriptEditor : Editor
         gizmoDrawing.min_room_height= EditorGUILayout.IntField("Min Room Height", gizmoDrawing.min_room_height);
         gizmoDrawing.max_room_height = EditorGUILayout.IntField("Max Room Height", gizmoDrawing.max_room_height);
 
-
+        gizmoDrawing.seed = EditorGUILayout.IntField("Seed", gizmoDrawing.seed);
 
         if (GUILayout.Button("Generate BSP"))
         {
             gizmoDrawing.GenerateBSP();
+        }
+        if (GUILayout.Button("Generate Random BSP"))
+        {
+            gizmoDrawing.GenerateRandomBSP();
         }
     }
 }
