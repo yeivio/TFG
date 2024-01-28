@@ -7,29 +7,18 @@ public class Dungeon
     private int originalHeight;
     private int originalWidth;
 
-
-    public Dungeon(bool[,] spaceContext)
+    public Dungeon(Vector2Int startPos, Vector2Int endPos)
     {
-        bool[] aux = new bool[spaceContext.GetLength(0) * spaceContext.GetLength(1)];
-        int index = 0;
-        this.originalHeight = spaceContext.GetLength(0);
-        this.originalWidth = spaceContext.GetLength(1);
 
-        for (int i = 0; i < spaceContext.GetLength(0); i++)
-        {
-            for (int j = 0; j < spaceContext.GetLength(1); j++)
-            {
-                aux[index] = spaceContext[i, j];
-                index++;
-            }
-        }
-
-        array = new BitArray(aux);
+        originalHeight = (endPos.y - startPos.y + 1);
+        originalWidth = (endPos.x - startPos.x + 1);
+        array = new BitArray(originalWidth * originalHeight);
+        
     }
 
     public void SetValor(int x, int y, bool value)
     {
-        array[x * GetColumnNum() + y] = value;
+        array[y * GetColumnNum() + x] = value;
     }
 
     public void SetValor(int index, bool value)
@@ -38,22 +27,12 @@ public class Dungeon
     }
     public bool getValor(int x, int y)
     {
-        return array[x * GetColumnNum() + y];
+        return array[y * GetColumnNum() + x];
     }
 
     public bool getValor(int index)
     {
         return array[index];
-    }
-
-
-    public void FindTrue()
-    {
-        for (int i = 0; i < array.Length; i++)
-        {
-            if (array[i])
-                Debug.Log("Encontrado" + i);
-        }
     }
 
     public int GetColumnNum()

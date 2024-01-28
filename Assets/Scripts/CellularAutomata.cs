@@ -18,6 +18,10 @@ public class CellularAutomata : GenerationAlgorithm
         this.widthMap = width;
         this.heightMap = height;
         map = new bool[width, height];
+
+        Debug.Log(width + "," + height);
+
+
         this.seed = seed.ToString();
         GenerateSeed(seed);
         GenerateRandomStart();
@@ -34,8 +38,7 @@ public class CellularAutomata : GenerationAlgorithm
         for (int x = 0; x < widthMap; x++) // Ancho de filas
             for (int y = 0; y < heightMap; y++) // Ancho de columnas
                 if (UnityEngine.Random.Range(0.0f,1.0f) <= chanceToStartAsWall)
-                    map[x,y] = true;
-        
+                    map[x, y] = true;
     }
 
     protected int CountNearWalls(int x, int y, int radius)
@@ -89,23 +92,5 @@ public class CellularAutomata : GenerationAlgorithm
         }
         this.map = copyMap;
         return copyMap;
-    }
-
-    public bool[,] TransposeMatrix()
-    {
-        var rows = map.GetLength(0);
-        var columns = map.GetLength(1);
-
-        var result = new bool[columns, rows];
-
-        for (var c = 0; c < columns; c++)
-        {
-            for (var r = 0; r < rows; r++)
-            {
-                result[c, r] = map[r, c];
-            }
-        }
-
-        return result;
     }
 }
