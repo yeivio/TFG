@@ -12,9 +12,7 @@ public class GizmoDrawing : MonoBehaviour
     #region Gizmo Settings
     [Header("DRAWING OPTIONS")]
     public int columnNum;   // Number of columns in the map
-    [Range(1, 100)]
     public int rowNum;  // Number of rows in the map
-    [Range(1, 100)]
     public int tileSize;    // Size of each tile on the canvas
     public float executionTime;
     #endregion
@@ -70,8 +68,8 @@ public class GizmoDrawing : MonoBehaviour
     {
         CellularAutomata cellularAutomata = new CellularAutomata();
         var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
-        this.mapValue = 
-            cellularAutomata.Generate(this.columnNum, this.rowNum, chanceToStartAsWall, numberSteps, MIN_CONVERSION_WALL, MIN_CONVERSION_BLANK, seed);
+        cellularAutomata.Generate(this.columnNum, this.rowNum, chanceToStartAsWall, numberSteps, MIN_CONVERSION_WALL, MIN_CONVERSION_BLANK, seed);
+        this.mapValue = cellularAutomata.TransposeMatrix();
         watch.Stop();
         executionTime = watch.ElapsedMilliseconds;
     }
@@ -82,8 +80,9 @@ public class GizmoDrawing : MonoBehaviour
         
         CellularAutomata cellularAutomata = new CellularAutomata();
         var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
-        this.mapValue = cellularAutomata.
-                Generate(this.columnNum, this.rowNum, chanceToStartAsWall, numberSteps, MIN_CONVERSION_WALL, MIN_CONVERSION_BLANK);
+        bool[,] aux =
+            cellularAutomata.Generate(this.columnNum, this.rowNum, chanceToStartAsWall, numberSteps, MIN_CONVERSION_WALL, MIN_CONVERSION_BLANK);
+        this.mapValue = cellularAutomata.TransposeMatrix();
         watch.Stop();
         executionTime = watch.ElapsedMilliseconds;
         this.seed = cellularAutomata.getSeed();
@@ -131,8 +130,8 @@ public class ScriptEditor : Editor
     public override void OnInspectorGUI()
     {
         GizmoDrawing gizmoDrawing = (GizmoDrawing)target;
-        gizmoDrawing.columnNum = EditorGUILayout.IntSlider("Number of columns", gizmoDrawing.columnNum, 0, 100);
-        gizmoDrawing.rowNum = EditorGUILayout.IntSlider("Number of rows", gizmoDrawing.rowNum, 0, 100);
+        gizmoDrawing.columnNum = EditorGUILayout.IntSlider("Number of columns", gizmoDrawing.columnNum, 0, 1000);
+        gizmoDrawing.rowNum = EditorGUILayout.IntSlider("Number of rows", gizmoDrawing.rowNum, 0, 1000);
         gizmoDrawing.tileSize = EditorGUILayout.IntSlider("Tile Size", gizmoDrawing.tileSize, 0, 100);
         EditorGUILayout.FloatField("Execution time (ms)", gizmoDrawing.executionTime);
         //DrawDefaultInspector(); // Draw all public variables

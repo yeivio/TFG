@@ -65,11 +65,6 @@ public class Dungeon
         return this.originalHeight;
     }
 
-    public int GetTotalSize()
-    {
-        return this.array.Count;
-    }
-
     public bool[,] ToBoolMatrix()
     {
         bool[,] aux = new bool[GetRowNum(), GetColumnNum()];
