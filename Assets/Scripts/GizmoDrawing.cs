@@ -11,8 +11,8 @@ public class GizmoDrawing : MonoBehaviour
 
     #region Gizmo Settings
     [Header("DRAWING OPTIONS")]
-    public int columnNum;   // Number of columns in the map
-    public int rowNum;  // Number of rows in the map
+    public int mapWidth;   // Number of columns in the map
+    public int mapHeight;  // Number of rows in the map
     public int tileSize;    // Size of each tile on the canvas
     public float executionTime;
     #endregion
@@ -20,11 +20,13 @@ public class GizmoDrawing : MonoBehaviour
     #region Cellular Automata Settings
     
     [Header("OPTIONS FOR CELLULAR AUTOMATA")]
-    public float chanceToStartAsWall; // Chance to start as a Wall
-    public int numberSteps; // Number of iterations
-    public int MIN_CONVERSION_WALL; // Min number of walls the cell must be surrounded to become a wall
-    public int MIN_CONVERSION_BLANK; // Min number of empty the cell must be surrounded to become an empty
-    public int seed;
+    public float chanceToStartAsWall = 0; // Chance to start as a Wall
+    public int numberSteps= 0; // Number of iterations
+    public int MIN_CONVERSION_WALL = 0; // Min number of walls the cell must be surrounded to become a wall
+    public int MIN_CONVERSION_BLANK = 0; // Min number of empty the cell must be surrounded to become an empty
+    public int seed = 0;
+    public int wallSizeThreshold = 0; // Min region size of walls that can exist
+    public int roomSizeThreshold = 0; // Min region size of room that can exist
     #endregion
 
     #region BSPTree Settings
@@ -46,46 +48,57 @@ public class GizmoDrawing : MonoBehaviour
 
     private void DrawMap()
     {
-        if (mapValue != null)
-            for (int i = 0; i < rowNum ; i++)
-                for (int j = 0; j < columnNum; j++)
+        if (mapValue != null) { 
+            for (int i = 0; i < mapHeight ; i++)
+                for (int j = 0; j < mapWidth; j++)
                 {
                     try
                     {
-                        if (mapValue[j, i])
+                        if (mapValue[j,i])
                             Gizmos.color = Color.black;
                         else
                             Gizmos.color = Color.white;
-                        Gizmos.DrawCube(new Vector3(tileSize * i+0.5f, tileSize * j + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
+                        Gizmos.DrawCube(new Vector3(tileSize * j+0.5f, tileSize * i + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
                     }catch
                     {
                         Gizmos.color = Color.gray;
-                        Gizmos.DrawCube(new Vector3(tileSize * i + 0.5f, tileSize * j + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
+                        Gizmos.DrawCube(new Vector3(tileSize * j + 0.5f, tileSize * i + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
                     }
                 }
+        }
     }
     public void GenerateCellular()
     {
         CellularAutomata cellularAutomata = new CellularAutomata();
         var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
-        this.mapValue = cellularAutomata.Generate(this.columnNum, this.rowNum, chanceToStartAsWall, numberSteps, MIN_CONVERSION_WALL, MIN_CONVERSION_BLANK, seed); ;
+        this.mapValue = cellularAutomata.Generate(this.mapWidth, this.mapHeight, chanceToStartAsWall, numberSteps, MIN_CONVERSION_WALL, MIN_CONVERSION_BLANK, seed); ;
         watch.Stop();
         executionTime = watch.ElapsedMilliseconds;
     }
 
 
-    public int GenerateRandomCellular()
+    public void GenerateRandomCellular()
     {
         
         CellularAutomata cellularAutomata = new CellularAutomata();
         var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
         this.mapValue =
-            cellularAutomata.Generate(this.columnNum, this.rowNum, chanceToStartAsWall, numberSteps, MIN_CONVERSION_WALL, MIN_CONVERSION_BLANK);
+            cellularAutomata.Generate(this.mapWidth, this.mapHeight, chanceToStartAsWall, numberSteps, MIN_CONVERSION_WALL, MIN_CONVERSION_BLANK);
+        watch.Stop();
+        executionTime = watch.ElapsedMilliseconds;
+        this.seed = cellularAutomata.getSeed();        
+    }
+
+    public void FilterCellular()
+    {
+        CellularAutomata cellularAutomata = new CellularAutomata();
+        var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
+        this.mapValue =
+            cellularAutomata.Generate(this.mapWidth, this.mapHeight, chanceToStartAsWall, numberSteps, MIN_CONVERSION_WALL, MIN_CONVERSION_BLANK, this.seed);
         watch.Stop();
         executionTime = watch.ElapsedMilliseconds;
         this.seed = cellularAutomata.getSeed();
-        return cellularAutomata.getSeed();
-        
+        cellularAutomata.FilteringProcess(this.wallSizeThreshold, this.roomSizeThreshold);
     }
 
     public void GenerateBSP()
@@ -93,7 +106,7 @@ public class GizmoDrawing : MonoBehaviour
 
         BSPTree tree = new BSPTree();
         var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
-        this.mapValue = tree.Generate(this.columnNum, this.rowNum, min_room_width, min_room_height,max_room_width, max_room_height, seed);
+        this.mapValue = tree.Generate(this.mapWidth, this.mapHeight, min_room_width, min_room_height,max_room_width, max_room_height, seed);
         watch.Stop();
         executionTime = watch.ElapsedMilliseconds;
         this.seed = tree.getSeed();
@@ -108,7 +121,7 @@ public class GizmoDrawing : MonoBehaviour
 
         BSPTree tree = new BSPTree();
         var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
-        this.mapValue = tree.Generate(this.columnNum, this.rowNum, min_room_width, min_room_height, max_room_width, max_room_height);
+        this.mapValue = tree.Generate(this.mapWidth, this.mapHeight, min_room_width, min_room_height, max_room_width, max_room_height);
         watch.Stop();
         executionTime = watch.ElapsedMilliseconds;
         this.seed = tree.getSeed();
@@ -128,8 +141,8 @@ public class ScriptEditor : Editor
     public override void OnInspectorGUI()
     {
         GizmoDrawing gizmoDrawing = (GizmoDrawing)target;
-        gizmoDrawing.columnNum = EditorGUILayout.IntSlider("Width", gizmoDrawing.columnNum, 0, 300);
-        gizmoDrawing.rowNum = EditorGUILayout.IntSlider("Height", gizmoDrawing.rowNum, 0, 300);
+        gizmoDrawing.mapWidth = EditorGUILayout.IntSlider("Width", gizmoDrawing.mapWidth, 0, 300);
+        gizmoDrawing.mapHeight = EditorGUILayout.IntSlider("Height", gizmoDrawing.mapHeight, 0, 300);
         gizmoDrawing.tileSize = EditorGUILayout.IntSlider("Tile Size", gizmoDrawing.tileSize, 0, 100);
         EditorGUILayout.FloatField("Execution time (ms)", gizmoDrawing.executionTime);
         //DrawDefaultInspector(); // Draw all public variables
@@ -171,6 +184,14 @@ public class ScriptEditor : Editor
         if (GUILayout.Button("Generate random cellular automata"))
         {
                 gizmoDrawing.GenerateRandomCellular();
+        }
+        
+        EditorGUILayout.Space();
+        gizmoDrawing.wallSizeThreshold = EditorGUILayout.IntSlider("Wall size - filtering", gizmoDrawing.wallSizeThreshold, 0, gizmoDrawing.mapWidth * gizmoDrawing.mapHeight);
+        gizmoDrawing.roomSizeThreshold = EditorGUILayout.IntSlider("Room size - filtering", gizmoDrawing.roomSizeThreshold, 0, gizmoDrawing.mapWidth * gizmoDrawing.mapHeight);
+        if (GUILayout.Button("Filter"))
+        {
+            gizmoDrawing.FilterCellular();
         }
     }
 
