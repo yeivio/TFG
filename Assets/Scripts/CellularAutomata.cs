@@ -9,11 +9,12 @@ public class CellularAutomata : GenerationAlgorithm
 {
     private float chanceToStartAsWall; // Chance to start as a Wall
     private float numberSteps; // Number of iterations
-    protected int MIN_CONVERSION_WALL; // Min number of walls the cell must be surrounded to become a wall
-    protected int MIN_CONVERSION_BLANK; // Min number of empty the cell must be surrounded to become an empty
+    private int MIN_CONVERSION_WALL; // Min number of walls the cell must be surrounded to become a wall
+    private int MIN_CONVERSION_BLANK; // Min number of empty the cell must be surrounded to become an empty
+    private List<List<Coords>> wallRegions;
+    private List<List<Coords>> roomRegions;
 
-
-    public virtual bool[,] Generate(int width, int height, float wallStart, int numberSteps, int conversionWall, int conversionBlank, int seed = -1)
+    public virtual bool[,] Generate(int width, int height, float wallStart, int numberSteps, int conversionWall, int conversionBlank, int wallRoomThreshold, int spaceRoomThreshold, int seed = -1)
     {
         this.chanceToStartAsWall = wallStart;
         this.numberSteps = numberSteps;
@@ -29,37 +30,35 @@ public class CellularAutomata : GenerationAlgorithm
         {
             simulationStep();
         }
-        
-        //FilteringProcess(0, 5);
+        FilteringProcess(wallRoomThreshold, spaceRoomThreshold);
         GenerateCorridors();
-
-        Debug.Log(GetAllRegionsOfType(false).Count + ","+ this.seed);
+        Debug.Log(GetAllRegionsOfType(false).Count + "," + this.seed);
         return this.map;
     }
 
-  
+
 
     private void GenerateRandomStart()
     {
         for (int x = 0; x < widthMap; x++) // Ancho de filas
             for (int y = 0; y < heightMap; y++) // Ancho de columnas
-                if (UnityEngine.Random.Range(0.0f,1.0f) <= chanceToStartAsWall)
+                if (UnityEngine.Random.Range(0.0f, 1.0f) <= chanceToStartAsWall)
                     map[x, y] = true;
     }
 
     protected int CountNearWalls(int x, int y, int radius)
     {
         int contador = 0;
-        
-        for(int i = -1; i <= radius; i++)
-            for(int j = -1; j<= radius; j++)
+
+        for (int i = -1; i <= radius; i++)
+            for (int j = -1; j <= radius; j++)
             {
                 int casillaX = x + i;
                 int casillaY = y + j;
 
-                if(i == 0 && j == 0) { /* We are on the central position */ } 
-                
-                else if(casillaX < 0 || casillaX >= this.widthMap
+                if (i == 0 && j == 0) { /* We are on the central position */ }
+
+                else if (casillaX < 0 || casillaX >= this.widthMap
                         || casillaY < 0 || casillaY >= this.heightMap)
                 {
                     contador++; // Out of bounds count as walls
@@ -69,23 +68,21 @@ public class CellularAutomata : GenerationAlgorithm
                     contador++;
                 }
             }
-        
+
         return contador;
     }
-
- 
-
     protected virtual bool[,] simulationStep()
     {
         bool[,] copyMap = new bool[this.widthMap, this.heightMap];
-        for(int x = 0; x < this.widthMap; x++) { 
-            for(int y = 0; y < this.heightMap; y++)
+        for (int x = 0; x < this.widthMap; x++)
+        {
+            for (int y = 0; y < this.heightMap; y++)
             {
                 int numWalls = this.CountNearWalls(x, y, 2);
                 if (this.map[x, y])
                 {
                     if (numWalls < MIN_CONVERSION_WALL)
-                        copyMap[x,y] = false;
+                        copyMap[x, y] = false;
                     else
                         copyMap[x, y] = true;
                 }
@@ -104,36 +101,30 @@ public class CellularAutomata : GenerationAlgorithm
 
     public void FilteringProcess(int thresholdWalls, int thresholdRooms)
     {
-        int wallThresholdsize = thresholdWalls;
-        int roomThresholdsize = thresholdRooms;
-
-        List<List<Coords>> wallRegions = GetAllRegionsOfType(true);
-        
+        wallRegions = GetAllRegionsOfType(true);
 
         foreach (List<Coords> region in wallRegions)
         {
-            if(region.Count <= wallThresholdsize)
+            if (region.Count <= thresholdWalls)
             {
-                foreach(Coords coord in region)
+                foreach (Coords coord in region)
                 {
                     map[coord.X, coord.Y] = false;
                 }
             }
         }
 
-        List<List<Coords>> roomRegions = GetAllRegionsOfType(false);
+        roomRegions = GetAllRegionsOfType(false);
         foreach (List<Coords> region in roomRegions)
         {
-            if(region.Count <= roomThresholdsize)
+            if (region.Count <= thresholdRooms)
             {
-                foreach(Coords coord in region)
+                foreach (Coords coord in region)
                 {
                     map[coord.X, coord.Y] = true;
                 }
             }
         }
-        
-        //Debug.Log("A" + roomRegions.Count);
     }
 
     private List<List<Coords>> GetAllRegionsOfType(bool isWall)
@@ -141,16 +132,16 @@ public class CellularAutomata : GenerationAlgorithm
         List<List<Coords>> coordsLists = new List<List<Coords>>();
         bool[,] controlMap = new bool[widthMap, heightMap];
 
-        for(int x = 0; x< widthMap; x++)
+        for (int x = 0; x < widthMap; x++)
         {
-            for(int y = 0; y< heightMap; y++)
+            for (int y = 0; y < heightMap; y++)
             {
-                if (!controlMap[x, y] && this.map[x,y] == isWall)
+                if (!controlMap[x, y] && this.map[x, y] == isWall)
                 {
-                    
+
                     List<Coords> reg = ExpandRegion(x, y);
                     coordsLists.Add(reg);
-                    foreach(Coords coord in reg)
+                    foreach (Coords coord in reg)
                     {
                         controlMap[coord.X, coord.Y] = true;
                     }
@@ -160,59 +151,57 @@ public class CellularAutomata : GenerationAlgorithm
         return coordsLists;
     }
 
-
+    /// <summary>
+    /// Given two coordinates on the map, this function starts expanding from that point until reaching a limit of
+    /// the map, or encounters cells which are not the same type as the original one. 
+    /// </summary>
+    /// <param name="firstX"></param>
+    /// <param name="firstY"></param>
+    /// <returns>Returns a List of Coords with every position that can be directly accesed.</returns>
     private List<Coords> ExpandRegion(int firstX, int firstY)
     {
-
+        //Flood fill algorithm https://en.wikipedia.org/wiki/Flood_fill
         List<Coords> regionCoords = new List<Coords>();
-        bool[,] controlMap= new bool[widthMap,heightMap];
+        bool[,] controlMap = new bool[widthMap, heightMap];
         Queue<Coords> coordsQueue = new Queue<Coords>();
         bool cellType = map[firstX, firstY];
 
         coordsQueue.Enqueue(new Coords(firstX, firstY));
-        while(coordsQueue.Count != 0)
+        while (coordsQueue.Count != 0)
         {
-            Coords aux  = coordsQueue.Dequeue();
-            
-            
-            if (aux.X < 0 || aux.X >= this.widthMap || aux.Y < 0 || aux.Y >= this.heightMap 
-                || controlMap[aux.X,aux.Y] || map[aux.X,aux.Y] != cellType)
-            {
-                
-            }
-            else
-            {
-                //Debug.Log("se añaden coords:" + aux.X + "," + aux.Y);
-                regionCoords.Add(aux);
-                controlMap[aux.X, aux.Y] = true;
-                coordsQueue.Enqueue(new Coords(aux.X + 1, aux.Y));
-                coordsQueue.Enqueue(new Coords(aux.X - 1, aux.Y));
-                coordsQueue.Enqueue(new Coords(aux.X, aux.Y + 1));
-                coordsQueue.Enqueue(new Coords(aux.X, aux.Y - 1));
-            }
+            Coords aux = coordsQueue.Dequeue();
+
+            if (aux.X < 0 || aux.X >= this.widthMap || aux.Y < 0 || aux.Y >= this.heightMap
+                || controlMap[aux.X, aux.Y] || map[aux.X, aux.Y] != cellType)
+                continue;
+
+            regionCoords.Add(aux);
+            controlMap[aux.X, aux.Y] = true;
+            coordsQueue.Enqueue(new Coords(aux.X + 1, aux.Y));
+            coordsQueue.Enqueue(new Coords(aux.X - 1, aux.Y));
+            coordsQueue.Enqueue(new Coords(aux.X, aux.Y + 1));
+            coordsQueue.Enqueue(new Coords(aux.X, aux.Y - 1));
+
         }
-        //Debug.Log("se termina region");
         return regionCoords;
     }
 
     private void GenerateCorridors()
     {
-        List<List<Coords>> wallRegions = GetAllRegionsOfType(false);
-        if (wallRegions.Count == 0)
+        // There are no walls
+        if (this.roomRegions.Count == 0)
             return;
-
-
 
         List<Region> regionsList = new List<Region>();
 
-        foreach (List<Coords> region in wallRegions)
+        foreach (List<Coords> region in this.roomRegions)
         {
             regionsList.Add(new Region(region, map));
         }
 
 
 
-        RegionDistance[,] distanceMatrix = new RegionDistance[regionsList.Count,regionsList.Count];
+        RegionDistance[,] distanceMatrix = new RegionDistance[regionsList.Count, regionsList.Count];
 
         for (int i = 0; i < regionsList.Count; i++)
         {
@@ -220,7 +209,7 @@ public class CellularAutomata : GenerationAlgorithm
             {
                 if (i == j)
                     continue;
-                if (distanceMatrix[i,j].distance == 0)
+                if (distanceMatrix[i, j].distance == 0)
                 {
                     RegionDistance minDistance = DistanceBetweenRegions(regionsList[i], regionsList[j]);
                     distanceMatrix[i, j] = minDistance;
@@ -228,27 +217,27 @@ public class CellularAutomata : GenerationAlgorithm
                 }
             }
         }
-        
+
         int index = 0;
         List<int> usedIndex = new List<int>();
-        while(usedIndex.Count != regionsList.Count - 1 )
+        while (usedIndex.Count != regionsList.Count - 1)
         {
             int secondIndex = -1;
             float minRegiondistance = float.MaxValue;
             RegionDistance regDist = new RegionDistance();
 
-            for(int i = 0; i < regionsList.Count; i++)
+            for (int i = 0; i < regionsList.Count; i++)
             {
                 //Debug.Log("Se accede:" + index + "," + secondIndex);
                 if (distanceMatrix[index, i].distance == 0 || regionsList[index].getConnectedList().Contains(regionsList[i])
-                    || usedIndex.Contains(i)) 
+                    || usedIndex.Contains(i))
                 {
                     //Debug.Log("Es igual:" + index + "," + i);
                     continue;
                 }
-                    
 
-                if (distanceMatrix[index,i].distance < minRegiondistance)
+
+                if (distanceMatrix[index, i].distance < minRegiondistance)
                 {
                     minRegiondistance = distanceMatrix[index, i].distance;
                     regDist = distanceMatrix[index, i];
@@ -263,10 +252,10 @@ public class CellularAutomata : GenerationAlgorithm
             {
                 if (i == index || i == secondIndex)
                     continue;
-                if (distanceMatrix[index,i].distance > distanceMatrix[secondIndex, i].distance)
+                if (distanceMatrix[index, i].distance > distanceMatrix[secondIndex, i].distance)
                 {
-                    distanceMatrix[index,i] = distanceMatrix[secondIndex,i];
-                    distanceMatrix[i,index] = distanceMatrix[i,secondIndex];
+                    distanceMatrix[index, i] = distanceMatrix[secondIndex, i];
+                    distanceMatrix[i, index] = distanceMatrix[i, secondIndex];
                 }
                 else
                 {
@@ -274,71 +263,19 @@ public class CellularAutomata : GenerationAlgorithm
                     distanceMatrix[i, secondIndex] = distanceMatrix[i, index];
                 }
             }
-
-
             usedIndex.Add(secondIndex);
-            //Debug.Log("Se unen:" + distanceMatrix[index, secondIndex].posRegionA + " y " + distanceMatrix[index, secondIndex].posRegionB + ",quedan:" + regionsList.Count);
-            //Debug.Log("Se añade a indices usados el:" + secondIndex);
             DigTunnel(regDist);
             regionsList[index].JoinRegion(regionsList[secondIndex]);
             regionsList[secondIndex].JoinRegion(regionsList[index]);
-            //regionsList.Remove(regionsList[secondIndex]);
-            //Debug.Log(index + "," + usedIndex.Contains(index));
             index++;
             while (usedIndex.Contains(index) || index >= regionsList.Count)
             {
                 index++;
                 if (index >= regionsList.Count)
                     index = 0;
-                
             }
-            //Debug.Log("siguiente index:" + index);
-
         }
-
     }
-    
-    /*private void DigTunnel(RegionDistance regDist)
-    {
-        Coords pointA = regDist.posRegionA;
-        Coords pointB = regDist.posRegionB;
-        //Debug.Log("Se calcula tunel de:" + pointA + pointB);
-        if(pointB.X == pointA.X)
-        {
-            for (int j = Mathf.Min(pointA.Y, pointB.Y); j <= Mathf.Max(pointA.Y, pointB.Y); j++)
-            {
-                map[pointB.X, j] = false;
-                if (j + 1 < this.widthMap)
-                    map[pointB.X, (j+ 1)] = false;
-                else
-                    map[pointB.X, (j - 1)] = false;
-            }
-        }
-        else
-        {
-            float m = (float)(pointB.Y - pointA.Y) / (float)(pointB.X - pointA.X);
-
-            float posY;
-            float lastPos = -1;
-
-            for (float i = Mathf.Min(pointA.X, pointB.X); i <= Mathf.Max(pointA.X, pointB.X); i += 0.1f)
-            {
-                //posY = (int)(m * i - (m * pointA.X + pointA.Y));
-                posY = ((m*(i-pointA.X))+pointA.Y);
-                //Debug.Log("Cavo:" + (int)i + "," + (int)posY);   
-                map[(int)i, (int)posY] = false;
-
-                if(lastPos != -1)
-                {
-                    
-                }
-                lastPos = posY;
-            }
-        }
-
-        
-    }*/
-
     private void DigTunnel(RegionDistance regDist)
     {
         //Bresenham algorithm
@@ -359,7 +296,7 @@ public class CellularAutomata : GenerationAlgorithm
         int longest = Mathf.Abs(dx);
         int shortest = Mathf.Abs(dy);
 
-        if(longest < shortest)
+        if (longest < shortest)
         {
             inverted = true;
             longest = Mathf.Abs(dy);
@@ -370,7 +307,7 @@ public class CellularAutomata : GenerationAlgorithm
         }
         int gradientAccumulation = longest / 2;
 
-        for(int i = 0; i< longest; i++)
+        for (int i = 0; i < longest; i++)
         {
             line.Add(new Coords(x, y));
             if (inverted)
@@ -382,7 +319,7 @@ public class CellularAutomata : GenerationAlgorithm
                 x += step;
             }
             gradientAccumulation += shortest;
-            if(gradientAccumulation>= longest)
+            if (gradientAccumulation >= longest)
             {
                 if (inverted)
                 {
@@ -402,22 +339,22 @@ public class CellularAutomata : GenerationAlgorithm
     public void Paint(List<Coords> line)
     {
         int r = 1;
-        foreach(Coords coords in line)
+        foreach (Coords coords in line)
         {
-            for(int x = -r; x <= r; x++)
+            for (int x = -r; x <= r; x++)
             {
-                for(int y = -r; y <= r; y++)
+                for (int y = -r; y <= r; y++)
                 {
-                    if(x*x + y*y <= r * r)
+                    if (x * x + y * y <= r * r)
                     {
                         int drawX = coords.X + x;
                         int drawY = coords.Y + y;
 
-                        if(drawX >= 0 && drawX < widthMap && drawY >= 0 && drawY <= heightMap)
+                        if (drawX >= 0 && drawX < widthMap && drawY >= 0 && drawY <= heightMap)
                         {
                             map[drawX, drawY] = false;
                         }
-                    } 
+                    }
                 }
             }
         }
@@ -428,16 +365,16 @@ public class CellularAutomata : GenerationAlgorithm
         float minDistanceAbs = float.MaxValue;
         float minDistanceTemp;
 
-        Coords coordsRegionA = new Coords(-1,-1);
-        Coords coordsRegionB = new Coords(-1,-1);
+        Coords coordsRegionA = new Coords(-1, -1);
+        Coords coordsRegionB = new Coords(-1, -1);
 
         foreach (Coords borderA in regionA.getBorderList())
         {
             foreach (Coords borderB in regionB.getBorderList())
             {
                 minDistanceTemp = Mathf.Abs(Mathf.Pow(
-                    Mathf.Pow(borderB.X - borderA.X, 2) 
-                    + Mathf.Pow(borderB.Y - borderA.Y,2),2));
+                    Mathf.Pow(borderB.X - borderA.X, 2)
+                    + Mathf.Pow(borderB.Y - borderA.Y, 2), 2));
 
                 if (minDistanceTemp < minDistanceAbs)
                 {
@@ -445,7 +382,7 @@ public class CellularAutomata : GenerationAlgorithm
                     coordsRegionA = borderA;
                     coordsRegionB = borderB;
                 }
-                    
+
             }
         }
 
@@ -517,18 +454,18 @@ public class CellularAutomata : GenerationAlgorithm
         {
             this.connectedRegion.Add(other);
             List<Coords> aux = new List<Coords>(other.getBorderList());
-            foreach(Coords coord in aux)
+            foreach (Coords coord in aux)
                 this.borderCoords.Add(coord);
         }
-        public List<Coords> getBorderList(){ return this.borderCoords; }
-        public List<Coords> getRegionList(){ return this.regionCoords; }
-        public List<Region> getConnectedList(){ return this.connectedRegion; }
+        public List<Coords> getBorderList() { return this.borderCoords; }
+        public List<Coords> getRegionList() { return this.regionCoords; }
+        public List<Region> getConnectedList() { return this.connectedRegion; }
     }
 
     public struct Coords
     {
 
-        public Coords(int x, int y, int region=-1)
+        public Coords(int x, int y, int region = -1)
         {
             X = x;
             Y = y;
@@ -539,8 +476,6 @@ public class CellularAutomata : GenerationAlgorithm
         public int Y { get; }
 
         public int Region { get; set; }
-
-        public override string ToString() => $"({X}, {Y})";
     }
 }
 

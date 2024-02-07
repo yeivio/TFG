@@ -71,7 +71,7 @@ public class GizmoDrawing : MonoBehaviour
     {
         CellularAutomata cellularAutomata = new CellularAutomata();
         var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
-        this.mapValue = cellularAutomata.Generate(this.mapWidth, this.mapHeight, chanceToStartAsWall, numberSteps, MIN_CONVERSION_WALL, MIN_CONVERSION_BLANK, seed); ;
+        this.mapValue = cellularAutomata.Generate(this.mapWidth, this.mapHeight, chanceToStartAsWall, numberSteps, MIN_CONVERSION_WALL, MIN_CONVERSION_BLANK, this.wallSizeThreshold, this.roomSizeThreshold, seed); ;
         watch.Stop();
         executionTime = watch.ElapsedMilliseconds;
     }
@@ -83,22 +83,10 @@ public class GizmoDrawing : MonoBehaviour
         CellularAutomata cellularAutomata = new CellularAutomata();
         var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
         this.mapValue =
-            cellularAutomata.Generate(this.mapWidth, this.mapHeight, chanceToStartAsWall, numberSteps, MIN_CONVERSION_WALL, MIN_CONVERSION_BLANK);
+            cellularAutomata.Generate(this.mapWidth, this.mapHeight, chanceToStartAsWall, numberSteps, MIN_CONVERSION_WALL, MIN_CONVERSION_BLANK, this.wallSizeThreshold, this.roomSizeThreshold);
         watch.Stop();
         executionTime = watch.ElapsedMilliseconds;
         this.seed = cellularAutomata.getSeed();        
-    }
-
-    public void FilterCellular()
-    {
-        CellularAutomata cellularAutomata = new CellularAutomata();
-        var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
-        this.mapValue =
-            cellularAutomata.Generate(this.mapWidth, this.mapHeight, chanceToStartAsWall, numberSteps, MIN_CONVERSION_WALL, MIN_CONVERSION_BLANK, this.seed);
-        watch.Stop();
-        executionTime = watch.ElapsedMilliseconds;
-        this.seed = cellularAutomata.getSeed();
-        cellularAutomata.FilteringProcess(this.wallSizeThreshold, this.roomSizeThreshold);
     }
 
     public void GenerateBSP()
@@ -110,23 +98,16 @@ public class GizmoDrawing : MonoBehaviour
         watch.Stop();
         executionTime = watch.ElapsedMilliseconds;
         this.seed = tree.getSeed();
-
-        
-
     }
 
     public void GenerateRandomBSP()
     {
-        
-
         BSPTree tree = new BSPTree();
         var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
         this.mapValue = tree.Generate(this.mapWidth, this.mapHeight, min_room_width, min_room_height, max_room_width, max_room_height);
         watch.Stop();
         executionTime = watch.ElapsedMilliseconds;
         this.seed = tree.getSeed();
-
-       
     }
 
 }
@@ -176,6 +157,9 @@ public class ScriptEditor : Editor
         gizmoDrawing.MIN_CONVERSION_BLANK = EditorGUILayout.IntField("Empty around to Convert", gizmoDrawing.MIN_CONVERSION_BLANK);
         gizmoDrawing.seed = EditorGUILayout.IntField("Seed", gizmoDrawing.seed);
 
+        gizmoDrawing.wallSizeThreshold = EditorGUILayout.IntSlider("Wall size - filtering", gizmoDrawing.wallSizeThreshold, 0, Mathf.Max(gizmoDrawing.mapWidth, gizmoDrawing.mapHeight));
+        gizmoDrawing.roomSizeThreshold = EditorGUILayout.IntSlider("Room size - filtering", gizmoDrawing.roomSizeThreshold, 0, Mathf.Max(gizmoDrawing.mapWidth, gizmoDrawing.mapHeight));
+
         if (GUILayout.Button("Generate cellular automata")) 
         {
                 gizmoDrawing.GenerateCellular();
@@ -184,14 +168,6 @@ public class ScriptEditor : Editor
         if (GUILayout.Button("Generate random cellular automata"))
         {
                 gizmoDrawing.GenerateRandomCellular();
-        }
-        
-        EditorGUILayout.Space();
-        gizmoDrawing.wallSizeThreshold = EditorGUILayout.IntSlider("Wall size - filtering", gizmoDrawing.wallSizeThreshold, 0, gizmoDrawing.mapWidth * gizmoDrawing.mapHeight);
-        gizmoDrawing.roomSizeThreshold = EditorGUILayout.IntSlider("Room size - filtering", gizmoDrawing.roomSizeThreshold, 0, gizmoDrawing.mapWidth * gizmoDrawing.mapHeight);
-        if (GUILayout.Button("Filter"))
-        {
-            gizmoDrawing.FilterCellular();
         }
     }
 
