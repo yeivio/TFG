@@ -1,12 +1,11 @@
 using System;
+using UnityEditor;
+using UnityEngine;
 
-public abstract class GenerationAlgorithm
+
+public abstract class GenerationAlgorithm : MonoBehaviour
 {
-    protected bool[,] map; // False == Empty | True == Wall
-    protected int widthMap;
-    protected int heightMap;
-
-    public string seed;
+    public int seed;
 
     protected void GenerateSeed(int seed = -1)
     {
@@ -14,11 +13,11 @@ public abstract class GenerationAlgorithm
         if (seed == -1) // No seed 
         {
             UnityEngine.Random.InitState(tempSeed);
-            this.seed = tempSeed.ToString();
+            this.seed = tempSeed;
         }
         else
             UnityEngine.Random.InitState(seed);
     }
 
-    public int getSeed() { return (int)Int64.Parse(seed); }
+    public int getSeed() { return seed; }
 }

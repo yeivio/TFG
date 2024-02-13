@@ -1,39 +1,61 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using UnityEditor;
+using Unity.VisualScripting;
 
-// 50 50 0.62 3 5 5 -272735705 Bug
-// 21 27 0.699 3 5 5 -1478784931
-// 29 17 0.227 3 5 5 -1083805850
 public class CellularAutomata : GenerationAlgorithm
 {
-    private float chanceToStartAsWall; // Chance to start as a Wall
-    private float numberSteps; // Number of iterations
-    private int MIN_CONVERSION_WALL; // Min number of walls the cell must be surrounded to become a wall
-    private int MIN_CONVERSION_BLANK; // Min number of empty the cell must be surrounded to become an empty
+
+    #region Gizmo Settings
+    [Header("DRAWING OPTIONS")]
+    public int widthMap;   // Number of columns in the map
+    public int heightMap;  // Number of rows in the map
+    public int tileSize;    // Size of each tile on the canvas
+    public long executionTime;
+    #endregion   
+
+    #region CELLULAR SETTINGS
+    public float chanceToStartAsWall; // Chance to start as a Wall
+    public int numberSteps; // Number of iterations
+    public int MIN_CONVERSION_WALL; // Min number of walls the cell must be surrounded to become a wall
+    public int MIN_CONVERSION_BLANK; // Min number of empty the cell must be surrounded to become an empty
+    public int wallSizeThreshold = 0; // Min region size of walls that can exist
+    public int roomSizeThreshold = 0; // Min region size of room that can exist
+    #endregion
+
     private List<List<Coords>> wallRegions;
     private List<List<Coords>> roomRegions;
+    private bool[,] map;
+    private bool canDraw;
 
-    public virtual bool[,] Generate(int width, int height, float wallStart, int numberSteps, int conversionWall, int conversionBlank, int wallRoomThreshold, int spaceRoomThreshold, int seed = -1)
+    private enum CELL_TYPE { WALL, ROOM };
+
+    public virtual bool[,] Generate(int seed = -1)
     {
-        this.chanceToStartAsWall = wallStart;
-        this.numberSteps = numberSteps;
-        this.MIN_CONVERSION_WALL = conversionWall;
-        this.MIN_CONVERSION_BLANK = conversionBlank;
-        this.widthMap = width;
-        this.heightMap = height;
-        map = new bool[width, height];
-        this.seed = seed.ToString();
+        canDraw = false;
+        map = new bool[widthMap, heightMap];
+        this.seed = seed;
         GenerateSeed(seed);
+        var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
+
         GenerateRandomStart();
         for (int i = 0; i < this.numberSteps; i++)
         {
             simulationStep();
         }
-        FilteringProcess(wallRoomThreshold, spaceRoomThreshold);
+        FilteringProcess(wallSizeThreshold, roomSizeThreshold);
         GenerateCorridors();
-        Debug.Log(GetAllRegionsOfType(false).Count + "," + this.seed);
-        return this.map;
+
+        //MeshGenerator meshGen = this.gameObject.GetComponent<MeshGenerator>();
+        //meshGen.GenerateMesh(this.map, 1);
+
+        watch.Stop();
+        executionTime = watch.ElapsedMilliseconds;
+        canDraw = true;
+        if(GetAllRegionsOfType(false).Count > 1)
+            Debug.LogError(GetAllRegionsOfType(false).Count + "," + this.seed);
+        return new bool[widthMap,heightMap];
     }
 
 
@@ -78,6 +100,11 @@ public class CellularAutomata : GenerationAlgorithm
         {
             for (int y = 0; y < this.heightMap; y++)
             {
+                if (x - 1 < 0 || x + 1 == this.widthMap || y - 1 < 0 || y + 1 >= this.heightMap) // If we are limit walls, we can't be empty
+                {
+                    copyMap[x, y] = true;
+                    continue;
+                }
                 int numWalls = this.CountNearWalls(x, y, 2);
                 if (this.map[x, y])
                 {
@@ -103,7 +130,7 @@ public class CellularAutomata : GenerationAlgorithm
     {
         wallRegions = GetAllRegionsOfType(true);
 
-        foreach (List<Coords> region in wallRegions)
+        foreach (List<Coords> region in new List<List<Coords>>(wallRegions))
         {
             if (region.Count <= thresholdWalls)
             {
@@ -111,11 +138,13 @@ public class CellularAutomata : GenerationAlgorithm
                 {
                     map[coord.X, coord.Y] = false;
                 }
+
+                wallRegions.Remove(region);
             }
         }
 
         roomRegions = GetAllRegionsOfType(false);
-        foreach (List<Coords> region in roomRegions)
+        foreach (List<Coords> region in new List<List<Coords>>(roomRegions))
         {
             if (region.Count <= thresholdRooms)
             {
@@ -123,6 +152,7 @@ public class CellularAutomata : GenerationAlgorithm
                 {
                     map[coord.X, coord.Y] = true;
                 }
+                roomRegions.Remove(region);
             }
         }
     }
@@ -477,6 +507,73 @@ public class CellularAutomata : GenerationAlgorithm
 
         public int Region { get; set; }
     }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (this.map != null && canDraw)
+        {
+            for (int i = 0; i < heightMap; i++)
+                for (int j = 0; j < widthMap; j++)
+                {
+                    try
+                    {
+                        if (map[j, i])
+                            Gizmos.color = Color.black;
+                        else
+                            Gizmos.color = Color.white;
+                        Gizmos.DrawCube(new Vector3(tileSize * j + 0.5f, tileSize * i + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
+                    }
+                    catch
+                    {
+                        Gizmos.color = Color.gray;
+                        Gizmos.DrawCube(new Vector3(tileSize * j + 0.5f, tileSize * i + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
+                    }
+                }
+        }
+    }
 }
 
 
+# region GizmoEditor
+#if UNITY_EDITOR
+[CustomEditor(typeof(CellularAutomata))]
+public class ScriptEditorCA : Editor
+{
+    private CellularAutomata gizmoDrawing;
+
+    public override void OnInspectorGUI()
+    {
+        gizmoDrawing = (CellularAutomata)target;
+        gizmoDrawing.widthMap = EditorGUILayout.IntSlider("Width", gizmoDrawing.widthMap, 0, 300);
+        gizmoDrawing.heightMap = EditorGUILayout.IntSlider("Height", gizmoDrawing.heightMap, 0, 300);
+        gizmoDrawing.tileSize = EditorGUILayout.IntSlider("Tile Size", gizmoDrawing.tileSize, 1, 100);
+        EditorGUILayout.FloatField("Execution time (ms)", gizmoDrawing.executionTime);
+        //DrawDefaultInspector(); // Draw all public variables
+        EditorGUILayout.Space();
+
+        gizmoDrawing.chanceToStartAsWall = EditorGUILayout.Slider("Chance to Start as Wall", gizmoDrawing.chanceToStartAsWall, 0, 1);
+        gizmoDrawing.numberSteps = EditorGUILayout.IntField("Number of iterations", gizmoDrawing.numberSteps);
+        gizmoDrawing.MIN_CONVERSION_WALL = EditorGUILayout.IntField("Walls around to Convert", gizmoDrawing.MIN_CONVERSION_WALL);
+        gizmoDrawing.MIN_CONVERSION_BLANK = EditorGUILayout.IntField("Empty around to Convert", gizmoDrawing.MIN_CONVERSION_BLANK);
+        gizmoDrawing.seed = EditorGUILayout.IntField("Seed", gizmoDrawing.seed);
+
+        gizmoDrawing.wallSizeThreshold = EditorGUILayout.IntSlider("Wall size - filtering", gizmoDrawing.wallSizeThreshold, 0, Mathf.Max(gizmoDrawing.widthMap, gizmoDrawing.heightMap));
+        gizmoDrawing.roomSizeThreshold = EditorGUILayout.IntSlider("Room size - filtering", gizmoDrawing.roomSizeThreshold, 0, Mathf.Max(gizmoDrawing.widthMap, gizmoDrawing.heightMap));
+
+        if (GUILayout.Button("Generate cellular automata"))
+        {
+            gizmoDrawing.Generate(gizmoDrawing.seed);
+            
+        }
+
+        if (GUILayout.Button("Generate random cellular automata"))
+        {
+            gizmoDrawing.Generate();
+        }
+
+        if (GUI.changed)
+            UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
+    }
+}
+#endif
+#endregion

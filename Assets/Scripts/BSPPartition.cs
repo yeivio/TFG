@@ -2,9 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
 
-// Bug -1383767366 18 18 4 4 4 4
-
-public class BSPTree : GenerationAlgorithm
+public class BSPPartition
 {
 
     [Header("OPTIONS FOR BSPTree")]
@@ -17,49 +15,65 @@ public class BSPTree : GenerationAlgorithm
     public int widthMap;   // Number of columns in the map
     public int heightMap;  // Number of rows in the map
 
+
+
     private bool[,] map;
 
-    public void Generate(int seed = -1)
+    public bool[,] Generate(int numColumns, int numRows, int min_room_width, int min_room_height, int max_room_width, int max_room_height, int seed)
     {
-        this.seed = seed;
-        GenerateSeed(seed);
+        this.widthMap = numColumns;
+        this.heightMap = numRows;
+        this.min_room_height = min_room_height;
+        this.min_room_width = min_room_width;
+        this.max_room_height = max_room_height;
+        this.max_room_width = max_room_width;
+        Random.InitState(seed);
         map = new bool[widthMap, heightMap];
 
+        List<Room> rooms = new List<Room>();
         RoomNode.SetHouseProperties(min_room_height, max_room_width, min_room_width, max_room_height);
-        RoomNode.map = map;
         // This is maybe wrong and should be heightmap first
-        RoomNode a = new RoomNode(new Vector2Int(0,0), new Vector2Int(widthMap - 1, heightMap - 1));
-
-        this.map = RoomNode.map;
+        RoomNode a = new RoomNode(new Vector2Int(0, 0), new Vector2Int(widthMap - 1, heightMap - 1), ref rooms);
+        DrawRooms(rooms);
+        return map;
     }
+
+    private void DrawRooms(List<Room> roomsList)
+    {
+        foreach (Room room in roomsList)
+        {
+            for (int i = room.getHouseSize().x; i > 0; i--)
+            {
+                for (int j = room.getHouseSize().y; j > 0; j--)
+                {
+                    map[room.getStartHousePosition().x - 1 + i, room.getStartHousePosition().y - 1 + j] = true;
+                }
+            }
+        }
+    }
+
     private class RoomNode
     {
-        public static bool[,] map;
-
         private static int min_room_width;
         private static int max_room_width;
         private static int min_room_height;
         private static int max_room_height;
 
-        // Child nodes
         private RoomNode leftNode;
         private RoomNode rightNode;
 
-        // Coordinates the node is positioned
         private Vector2Int startContext;
         private Vector2Int endContext;
         private Dungeon spaceContext;
 
-        // If the node is leaf and the room connected
         private bool iamleaf;
+
         private Room room;
 
-        // Split information
         public bool splitHorizonal; // If the node makes an horizontal split
         public int splitLocation;
 
-
-        public RoomNode(Vector2Int startContext, Vector2Int endContext)
+        public RoomNode(Vector2Int startContext, Vector2Int endContext, ref List<Room> listRooms)
         {
 
             this.startContext = startContext;
@@ -72,7 +86,7 @@ public class BSPTree : GenerationAlgorithm
             if (((float)spaceContext.GetRowNum() / 2) > max_room_height ||
                 ((float)spaceContext.GetColumnNum() / 2) > max_room_width)
             {
-                this.Split();
+                this.Split(ref listRooms);
             }
             else
             {
@@ -88,22 +102,14 @@ public class BSPTree : GenerationAlgorithm
                 //Debug.Log("Soy dibujo[" + startWidth + "," + startheight + "]");
                 //Debug.Log("Soy tamaño[" + houseWidth + "," + houseHeight + "]");
 
-                
                 this.room = new Room(new Vector2Int(startWidth, startheight), new Vector2Int(houseWidth, houseHeight));
                 iamleaf = true;
 
-                for (int i = room.getHouseSize().x; i > 0; i--)
-                {
-                    for (int j = room.getHouseSize().y; j > 0; j--)
-                    {
-                        map[room.getStartHousePosition().x - 1 + i, room.getStartHousePosition().y - 1 + j] = true;
-                    }
-                }
             }
         }
 
 
-        public void Split()
+        public void Split(ref List<Room> listRooms)
         {
             // Calculate if we are getting an horizontal or vertical split 
 
@@ -119,14 +125,13 @@ public class BSPTree : GenerationAlgorithm
             if (splitHorizonal)
             {
                 splitLocation = (int)Random.Range(startContext.y + min_room_height, endContext.y - min_room_height + 1);
-                
+
                 //Debug.Log("Corte Horizontal en:" + splitLocation + ",Soy[" + startContext + "," + endContext + "]");
                 //Debug.Log("Se va a crear izq:" + startContext + "X" + new Vector2Int(endContext.x, splitLocation - 1));
                 //Debug.Log("Se va a crear der:" + new Vector2Int(startContext.x, splitLocation + 1) + "X" + endContext);
 
-                leftNode = new RoomNode(startContext, new Vector2Int(endContext.x, splitLocation - 1)); // Down
-                rightNode = new RoomNode(new Vector2Int(startContext.x, splitLocation + 1), endContext); // Up
-
+                leftNode = new RoomNode(startContext, new Vector2Int(endContext.x, splitLocation - 1), ref listRooms);
+                rightNode = new RoomNode(new Vector2Int(startContext.x, splitLocation + 1), endContext, ref listRooms);
             }
             else
             {
@@ -136,12 +141,13 @@ public class BSPTree : GenerationAlgorithm
                 //Debug.Log("Se va a crear izq:" + startContext + "X" + new Vector2Int(splitLocation - 1, endContext.y));
                 //Debug.Log("Se va a crear der:" + new Vector2Int(splitLocation + 1, startContext.y) + "X" + endContext);
 
-                leftNode = new RoomNode(startContext, new Vector2Int(splitLocation - 1, endContext.y)); // Left
-                rightNode = new RoomNode(new Vector2Int(splitLocation + 1, startContext.y), endContext); // Right
+                leftNode = new RoomNode(startContext, new Vector2Int(splitLocation - 1, endContext.y), ref listRooms);
+                rightNode = new RoomNode(new Vector2Int(splitLocation + 1, startContext.y), endContext, ref listRooms);
             }
-
-            // Joining rooms
-
+            if (leftNode.IsLeaf())
+                listRooms.Add(leftNode.room);
+            if (rightNode.IsLeaf())
+                listRooms.Add(rightNode.room);
         }
 
         public Dungeon GetMap()
@@ -169,26 +175,11 @@ public class BSPTree : GenerationAlgorithm
         private Vector2Int startHousePosition;  // Height x Width
         private Vector2Int houseSize;   // sizes in width x height
 
-        private List<Vector2Int> roomPivotes; // Corners of the house.
-        // 1. Left - Down
-        // 2. Left - Up
-        // 3. Right - Down
-        // 4. Right -Up
-
-
 
         public Room(Vector2Int startPos, Vector2Int houseSize)
         {
             this.startHousePosition = new Vector2Int(startPos.x, startPos.y);
             this.houseSize = new Vector2Int(houseSize.x, houseSize.y);
-            roomPivotes = new List<Vector2Int>()
-            { 
-                new Vector2Int(startHousePosition.x, startHousePosition.y),
-                new Vector2Int(startHousePosition.x, startHousePosition.y + houseSize.y), 
-                new Vector2Int(startHousePosition.x + houseSize.x, startHousePosition.y),
-                new Vector2Int(startHousePosition.x + houseSize.x, startHousePosition.y + houseSize.y)
-
-            };
         }
         /// <summary>
         /// Returns the position where the room is placed. Height is X-axe, and width is Y-axe
@@ -205,25 +196,9 @@ public class BSPTree : GenerationAlgorithm
 
         public Vector2Int getStartHousePosition() { return this.startHousePosition; }
         public Vector2Int getHouseSize() { return this.houseSize; }
-        /// <summary>
-        /// Return the corners of the house. The order is the following
-        /// 1. Left - Down
-        /// 2. Left - Up
-        /// 3. Right - Down
-        /// 4. Right -Up
-        /// </summary>
-        /// <returns></returns>
-        public List<Vector2Int> getPivotList() { return this.roomPivotes; }
     }
 
-    private class Tunnel
-    {
-        public List<Vector2Int> positions;
-        public Tunnel()
-        {
-            this.positions = new List<Vector2Int>();
-        }
-    }
+
 
     private void OnDrawGizmosSelected()
     {
@@ -250,48 +225,6 @@ public class BSPTree : GenerationAlgorithm
     }
 }
 
-
-# region GizmoEditor
-#if UNITY_EDITOR
-[CustomEditor(typeof(BSPTree))]
-public class ScriptEditorBSP : Editor
-{
-    private BSPTree gizmoDrawing;
-
-    public override void OnInspectorGUI()
-    {
-        gizmoDrawing = (BSPTree)target;
-        gizmoDrawing.widthMap = EditorGUILayout.IntSlider("Width", gizmoDrawing.widthMap, 0, 300);
-        gizmoDrawing.heightMap = EditorGUILayout.IntSlider("Height", gizmoDrawing.heightMap, 0, 300);
-        gizmoDrawing.tileSize = EditorGUILayout.IntSlider("Tile Size", gizmoDrawing.tileSize, 1, 100);
-        EditorGUILayout.FloatField("Execution time (ms)", gizmoDrawing.executionTime);
-        //DrawDefaultInspector(); // Draw all public variables
-        EditorGUILayout.Space();
-        gizmoDrawing.seed = EditorGUILayout.IntField("Seed", gizmoDrawing.seed);
-
-        gizmoDrawing.min_room_width = EditorGUILayout.IntField("Min Room Width", gizmoDrawing.min_room_width);
-        gizmoDrawing.max_room_width = EditorGUILayout.IntField("Max Room Width", gizmoDrawing.max_room_width);
-
-        gizmoDrawing.min_room_height = EditorGUILayout.IntField("Min Room Height", gizmoDrawing.min_room_height);
-        gizmoDrawing.max_room_height = EditorGUILayout.IntField("Max Room Height", gizmoDrawing.max_room_height);
-
-        gizmoDrawing.seed = EditorGUILayout.IntField("Seed", gizmoDrawing.seed);
-
-        if (GUILayout.Button("Generate BSP"))
-        {
-            gizmoDrawing.Generate(gizmoDrawing.seed);
-        }
-        if (GUILayout.Button("Generate Random BSP"))
-        {
-            gizmoDrawing.Generate();
-        }
-
-        if (GUI.changed)
-            UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
-    }
-}
-#endif
-#endregion
 
 
 
