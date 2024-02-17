@@ -1,9 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
+// 2 3 1528892033
 public class MazeAlgorithm : GenerationAlgorithm
 {
     #region Gizmo Settings
@@ -14,11 +17,22 @@ public class MazeAlgorithm : GenerationAlgorithm
     public long executionTime;
     #endregion   
     private Cell[,] map; // True is Used, False is not Used
-    public List<Sprite> sp;
+    public List<Tiles> usableTiles;
+
+    
 
 
     public void Generate(int seed = -1)
     {
+        // Clean prev output
+        int childCount = transform.childCount;
+        for (int i = 0; i < childCount; i++)
+        {
+            Destroy(this.transform.GetChild(i).gameObject);
+        }
+
+
+
         this.seed = seed;
         GenerateSeed(seed);
 
@@ -30,8 +44,8 @@ public class MazeAlgorithm : GenerationAlgorithm
                 map[i, j] = new Cell();
             }
         }
-        int startingX = Random.Range(0, widthMap);
-        int startingY = Random.Range(0, heightMap);
+        int startingX = UnityEngine.Random.Range(0, widthMap);
+        int startingY = UnityEngine.Random.Range(0, heightMap);
         while(!allCellsExplored() )
         {
             kill(startingX, startingY);
@@ -52,16 +66,90 @@ public class MazeAlgorithm : GenerationAlgorithm
                 {
                     if (map[j, i].isVisited)
                     {
-                        int num = Random.Range(0, sp.Count);
-                        GameObject aux = new GameObject().gameObject;
-                        aux.AddComponent<SpriteRenderer>().sprite = sp[num];
-                        aux.gameObject.transform.position = new Vector3(j, i, 0);
+                        SpawnTile(j,i);
                     }
-                            
-
-                        //Gizmos.DrawCube(new Vector3(tileSize * j + 0.5f, tileSize * i + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
                 }
         }
+    }
+
+    public void SpawnTile(int x, int y)
+    {
+        List<Tiles> options = new List<Tiles>(usableTiles);
+
+        // Filter Candidates
+        foreach(Cell.ORIENTATION or in Enum.GetValues(typeof(Cell.ORIENTATION)))
+        {
+            if(!map[x, y].GetConnections().Contains(or)) {
+                // Add new tiles
+                foreach(Tiles tile in this.usableTiles)
+                {
+                    switch (or)
+                    {
+                        case Cell.ORIENTATION.LEFT:
+                            if(tile.LeftPosibilities.Length > 0)
+                                options.Remove(tile);
+                            break;
+                        case Cell.ORIENTATION.RIGHT:
+                            if (tile.RightPosibilities.Length > 0)
+                                options.Remove(tile);
+                            break;
+                        case Cell.ORIENTATION.UP:
+                            if (tile.TopPosibilities.Length > 0)
+                                options.Remove(tile);
+                            break;
+                        case Cell.ORIENTATION.DOWN:
+                            if (tile.BottomPosibilities.Length > 0)
+                                options.Remove(tile);
+                            break;
+                    }
+                }
+            }
+        }
+        // Now we can have Tiles that maybe only satisfy 1 condition
+        // We must filter cells now that doesn't satisfy ALL the conditions
+
+        foreach (Cell.ORIENTATION or in Enum.GetValues(typeof(Cell.ORIENTATION)))
+        {
+            if (map[x, y].GetConnections().Contains(or))
+            {
+                // Add new tiles
+                foreach (Tiles tile in this.usableTiles)
+                {
+                    switch (or)
+                    {
+                        case Cell.ORIENTATION.LEFT:
+                            if (tile.LeftPosibilities.Length == 0)
+                                options.Remove(tile);
+                            break;
+                        case Cell.ORIENTATION.RIGHT:
+                            if (tile.RightPosibilities.Length == 0)
+                                options.Remove(tile);
+                            break;
+                        case Cell.ORIENTATION.UP:
+                            if (tile.TopPosibilities.Length == 0)
+                                options.Remove(tile);
+                            break;
+                        case Cell.ORIENTATION.DOWN:
+                            if (tile.BottomPosibilities.Length == 0)
+                                options.Remove(tile);
+                            break;
+                    }
+                }
+            }
+        }
+
+
+
+        int num = UnityEngine.Random.Range(0, options.Count);
+        GameObject aux = new GameObject().gameObject;
+        try { 
+            aux.AddComponent<SpriteRenderer>().sprite = options[num].GetComponent<SpriteRenderer>().sprite;
+        }catch (Exception ex)
+        {
+            Debug.Log("Seed:" + seed);
+        }
+        aux.transform.parent = this.transform;
+        aux.gameObject.transform.position = new Vector3(x, y, 0);
     }
 
     public void kill(int x, int y)
@@ -72,7 +160,7 @@ public class MazeAlgorithm : GenerationAlgorithm
         this.map[xIndex, yIndex].isVisited = true;
         while (canFindNeighbour(xIndex,yIndex))
         {
-            int direction = Random.Range(0, 4);
+            int direction = UnityEngine.Random.Range(0, 4);
             switch(direction)
             {
                 case 0:
@@ -186,46 +274,23 @@ public class MazeAlgorithm : GenerationAlgorithm
     public class Cell
     {
         public bool isVisited;
-        public bool[] connection; // UP DOWN LEFT RIGHT
+        public List<Cell.ORIENTATION> connections;
         public enum ORIENTATION {UP, DOWN, LEFT, RIGHT}
 
         public Cell()
         {
             isVisited = false;
-            connection = new bool[4];
+            connections = new List<Cell.ORIENTATION>();
         }
 
         public void setConnection(ORIENTATION or)
         {
-            switch (or)
-            {
-                case ORIENTATION.UP:
-                    connection[0] = true;
-                    break;
-                case ORIENTATION.DOWN:
-                    connection[1] = true;
-                    break;
-                case ORIENTATION.LEFT:
-                    connection[2] = true;
-                    break;
-                case ORIENTATION.RIGHT:
-                    connection[3] = true;
-                    break;
-            }
+            connections.Add(or);
         }
 
         public List<ORIENTATION> GetConnections()
         {
-            List<ORIENTATION> aux = new List<ORIENTATION>();
-            if (connection[0])
-                aux.Add(ORIENTATION.UP);
-            if (connection[1])
-                aux.Add(ORIENTATION.DOWN);
-            if (connection[2])
-                aux.Add(ORIENTATION.LEFT);
-            if (connection[3])
-                aux.Add(ORIENTATION.RIGHT);
-            return aux;
+            return this.connections;
         }
     }
 
@@ -299,7 +364,7 @@ public class ScriptEditorMaze : Editor
         //DrawDefaultInspector(); // Draw all public variables
         EditorGUILayout.Space();
         gizmoDrawing.seed = EditorGUILayout.IntField("Seed", gizmoDrawing.seed);
-        EditorGUILayout.PropertyField(serializedObject.FindProperty("sp"), new GUIContent("Sprite"));
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("usableTiles"), new GUIContent("Sprite"));
 
         if (GUILayout.Button("Generate cellular automata"))
         {
