@@ -86,19 +86,19 @@ public class MazeAlgorithm : GenerationAlgorithm
                     switch (or)
                     {
                         case Cell.ORIENTATION.LEFT:
-                            if(tile.LeftPosibilities.Length > 0)
+                            if(tile.isLeftConnected)
                                 options.Remove(tile);
                             break;
                         case Cell.ORIENTATION.RIGHT:
-                            if (tile.RightPosibilities.Length > 0)
+                            if (tile.isRightConnected)
                                 options.Remove(tile);
                             break;
                         case Cell.ORIENTATION.UP:
-                            if (tile.TopPosibilities.Length > 0)
+                            if (tile.isTopConnected)
                                 options.Remove(tile);
                             break;
                         case Cell.ORIENTATION.DOWN:
-                            if (tile.BottomPosibilities.Length > 0)
+                            if (tile.isBottomConnected)
                                 options.Remove(tile);
                             break;
                     }
@@ -118,19 +118,19 @@ public class MazeAlgorithm : GenerationAlgorithm
                     switch (or)
                     {
                         case Cell.ORIENTATION.LEFT:
-                            if (tile.LeftPosibilities.Length == 0)
+                            if (!tile.isLeftConnected)
                                 options.Remove(tile);
                             break;
                         case Cell.ORIENTATION.RIGHT:
-                            if (tile.RightPosibilities.Length == 0)
+                            if (!tile.isRightConnected)
                                 options.Remove(tile);
                             break;
                         case Cell.ORIENTATION.UP:
-                            if (tile.TopPosibilities.Length == 0)
+                            if (!tile.isTopConnected)
                                 options.Remove(tile);
                             break;
                         case Cell.ORIENTATION.DOWN:
-                            if (tile.BottomPosibilities.Length == 0)
+                            if (!tile.isBottomConnected)
                                 options.Remove(tile);
                             break;
                     }

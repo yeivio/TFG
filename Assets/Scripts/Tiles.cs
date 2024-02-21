@@ -7,4 +7,10 @@ public class Tiles : MonoBehaviour
     public Tiles[] RightPosibilities;
     public Tiles[] LeftPosibilities;
     public Tiles[] BottomPosibilities;
+
+
+    public bool isLeftConnected;
+    public bool isRightConnected;
+    public bool isBottomConnected;
+    public bool isTopConnected;
 }

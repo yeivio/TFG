@@ -97,8 +97,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9cf68ed67c0f906459cd20d1195ac6b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TopPosibilities: []
-  RightPosibilities: []
+  TopPosibilities:
+  - {fileID: -1276237396861887320, guid: 16c2286b922aaec4b86caebf01dac29a, type: 3}
+  - {fileID: 2010700526583109283, guid: 893d375e24e0f354b8fc089b552680ec, type: 3}
+  - {fileID: -604170607812809708, guid: bc08605bd34f254428c3f6e2cedb1cca, type: 3}
+  - {fileID: 295492237392984696, guid: 98074479e660cdb4e9d0a0cac6c81306, type: 3}
+  - {fileID: -6471471138752177162, guid: cbfca4f0575189c479ba786730dc7222, type: 3}
+  - {fileID: 3584676297079117778, guid: ac13488e2c8c204498874653e671df63, type: 3}
+  - {fileID: -5257880468722782078, guid: 89c0223fae1e3c6469e5ee9d1b778c97, type: 3}
+  - {fileID: -7456896534610353609, guid: 3629e9806687f1c498077ce146147963, type: 3}
+  RightPosibilities:
+  - {fileID: -985284377366289241, guid: 7293f6fc7f42d8b4d96106aa6d9092db, type: 3}
+  - {fileID: -312012828959519883, guid: 9e905008b01de3a4f80b2987130a050e, type: 3}
+  - {fileID: -1276237396861887320, guid: 16c2286b922aaec4b86caebf01dac29a, type: 3}
+  - {fileID: 295492237392984696, guid: 98074479e660cdb4e9d0a0cac6c81306, type: 3}
+  - {fileID: -6471471138752177162, guid: cbfca4f0575189c479ba786730dc7222, type: 3}
+  - {fileID: 3243867846889016732, guid: 7e825ed33fa45144e821355544fb7787, type: 3}
+  - {fileID: -4378381675446566067, guid: b7e6f759a348bd34c95da83812e61a64, type: 3}
+  - {fileID: -7456896534610353609, guid: 3629e9806687f1c498077ce146147963, type: 3}
   LeftPosibilities:
   - {fileID: 6908105143622699393, guid: 19121c40fff4e6f49a38fa5f45bc0198, type: 3}
   - {fileID: -985284377366289241, guid: 7293f6fc7f42d8b4d96106aa6d9092db, type: 3}
@@ -117,3 +133,7 @@ MonoBehaviour:
   - {fileID: -604170607812809708, guid: bc08605bd34f254428c3f6e2cedb1cca, type: 3}
   - {fileID: 295492237392984696, guid: 98074479e660cdb4e9d0a0cac6c81306, type: 3}
   - {fileID: -6471471138752177162, guid: cbfca4f0575189c479ba786730dc7222, type: 3}
+  isLeftConnected: 1
+  isRightConnected: 0
+  isBottomConnected: 1
+  isTopConnected: 0

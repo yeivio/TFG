@@ -47,9 +47,6 @@ public class CellularAutomata : GenerationAlgorithm
         FilteringProcess(wallSizeThreshold, roomSizeThreshold);
         GenerateCorridors();
 
-        //MeshGenerator meshGen = this.gameObject.GetComponent<MeshGenerator>();
-        //meshGen.GenerateMesh(this.map, 1);
-
         watch.Stop();
         executionTime = watch.ElapsedMilliseconds;
         canDraw = true;
@@ -510,7 +507,9 @@ public class CellularAutomata : GenerationAlgorithm
 
     private void OnDrawGizmosSelected()
     {
-        if (this.map != null && canDraw)
+        if (Application.isPlaying)
+            return;
+        if (this.map != null && canDraw )
         {
             for (int i = 0; i < heightMap; i++)
                 for (int j = 0; j < widthMap; j++)
