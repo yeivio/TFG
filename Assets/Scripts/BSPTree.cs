@@ -2,11 +2,10 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
 
-// Bug -1383767366 18 18 4 4 4 4
+// 12 12 2 2 2 2  -1690281877 bug
 
 public class BSPTree : GenerationAlgorithm
 {
-
     [Header("OPTIONS FOR BSPTree")]
     public int min_room_width;
     public int max_room_width;
@@ -27,19 +26,17 @@ public class BSPTree : GenerationAlgorithm
 
         RoomNode.SetHouseProperties(min_room_height, max_room_width, min_room_width, max_room_height);
         RoomNode.map = map;
-        // This is maybe wrong and should be heightmap first
-        RoomNode a = new RoomNode(new Vector2Int(0,0), new Vector2Int(widthMap - 1, heightMap - 1));
-
+        Debug.Log("s:" + this.seed);
+        RoomNode a = new RoomNode(new Vector2Int(0,0), new Vector2Int(widthMap - 1, heightMap - 1), new List<Vector2Int>());
         this.map = RoomNode.map;
     }
     private class RoomNode
     {
         public static bool[,] map;
-
-        private static int min_room_width;
-        private static int max_room_width;
-        private static int min_room_height;
-        private static int max_room_height;
+        public static int min_room_width;
+        public static int max_room_width;
+        public static int min_room_height;
+        public static int max_room_height;
 
         // Child nodes
         private RoomNode leftNode;
@@ -48,111 +45,259 @@ public class BSPTree : GenerationAlgorithm
         // Coordinates the node is positioned
         private Vector2Int startContext;
         private Vector2Int endContext;
-        private Dungeon spaceContext;
 
         // If the node is leaf and the room connected
-        private bool iamleaf;
         private Room room;
+        private List<Vector2Int> listDoors;
 
         // Split information
         public bool splitHorizonal; // If the node makes an horizontal split
-        public int splitLocation;
+        public int splitLocation = -1;
+        public int spaceBetween = 1;
+        public int numDoors = 1; // possible doors on every wall
 
 
-        public RoomNode(Vector2Int startContext, Vector2Int endContext)
+        public int FORCE_BREAK = 40000;
+        public int brek = 0;
+        public int FORCE_BREAK_2 = 40000;
+        public int brek_2 = 0;
+
+        public RoomNode(Vector2Int startContext, Vector2Int endContext, List<Vector2Int> listDoors)
         {
-
+            brek++;
+            if (brek >= FORCE_BREAK)
+            {
+                Debug.Log("Force:");
+                return;
+            }
             this.startContext = startContext;
             this.endContext = endContext;
-            this.spaceContext = new Dungeon(startContext, endContext);
+            this.listDoors = new List<Vector2Int>(listDoors);
 
-            //Debug.Log("Nazco[" + startContext + "," + endContext + "]");
-            //Debug.Log("Nazco[" + spaceContext.GetColumnNum() + "," + spaceContext.GetRowNum() + "]");
             //If there isnt enough space for a room, then he is a leaf
-            if (((float)spaceContext.GetRowNum() / 2) > max_room_height ||
-                ((float)spaceContext.GetColumnNum() / 2) > max_room_width)
+            if (((float)getHeightContext() / 2) > max_room_height + numDoors||
+                ((float)getWidthContext() / 2) > max_room_width + numDoors)
             {
                 this.Split();
             }
             else
             {
-                //Debug.Log("Soy dibujo[" + spaceContext.GetColumnNum() + "," + spaceContext.GetRowNum() + "]");
                 //Draw room when you can't divide
-                int houseWidth = Random.Range(min_room_width, Mathf.Min(max_room_width, spaceContext.GetColumnNum()) + 1);
-                int houseHeight = Random.Range(min_room_height, Mathf.Min(max_room_height, spaceContext.GetRowNum()) + 1);
+                int houseWidth = Random.Range(min_room_width, Mathf.Min(max_room_width, getWidthContext()) + 1);
+                int houseHeight = Random.Range(min_room_height, Mathf.Min(max_room_height, getHeightContext()) + 1);
 
-                int startWidth = Random.Range(startContext.x, startContext.x + (spaceContext.GetColumnNum() - houseWidth));
-                int startheight = Random.Range(startContext.y, startContext.y + (spaceContext.GetRowNum() - houseHeight));
-
-                //Debug.Log("Soy originalmente[" + startContext + "," + endContext + "]");
-                //Debug.Log("Soy dibujo[" + startWidth + "," + startheight + "]");
-                //Debug.Log("Soy tamaño[" + houseWidth + "," + houseHeight + "]");
-
+                int startWidth = Random.Range(startContext.x, startContext.x + (getWidthContext() - houseWidth));
+                int startheight = Random.Range(startContext.y, startContext.y + (getHeightContext() - houseHeight));
                 
                 this.room = new Room(new Vector2Int(startWidth, startheight), new Vector2Int(houseWidth, houseHeight));
-                iamleaf = true;
-
                 for (int i = room.getHouseSize().x; i > 0; i--)
                 {
                     for (int j = room.getHouseSize().y; j > 0; j--)
                     {
+                        
                         map[room.getStartHousePosition().x - 1 + i, room.getStartHousePosition().y - 1 + j] = true;
                     }
                 }
+
+                // Connect room to Door
+                foreach (Vector2Int door in listDoors)
+                    ConnectRoomToDoor(this.room, door);
+
             }
         }
-
 
         public void Split()
         {
             // Calculate if we are getting an horizontal or vertical split 
 
-            if (((float)spaceContext.GetRowNum() / 2) > min_room_height &&
-                ((float)spaceContext.GetColumnNum() / 2) > min_room_width)
+            if (((float)getHeightContext() / 2) > min_room_height + numDoors &&
+                ((float)getWidthContext() / 2) > min_room_width + numDoors)
             {
                 splitHorizonal = Random.Range(0.0f, 1.0f) > 0.5;    //Random election
             }
             else
             {
-                splitHorizonal = ((float)spaceContext.GetRowNum() / 2) > min_room_height;
+                splitHorizonal = ((float)getHeightContext() / 2) > min_room_height + numDoors;
             }
+            
             if (splitHorizonal)
             {
-                splitLocation = (int)Random.Range(startContext.y + min_room_height, endContext.y - min_room_height + 1);
-                
-                //Debug.Log("Corte Horizontal en:" + splitLocation + ",Soy[" + startContext + "," + endContext + "]");
-                //Debug.Log("Se va a crear izq:" + startContext + "X" + new Vector2Int(endContext.x, splitLocation - 1));
-                //Debug.Log("Se va a crear der:" + new Vector2Int(startContext.x, splitLocation + 1) + "X" + endContext);
+                splitLocation = (int)Random.Range(startContext.y + min_room_height, endContext.y - min_room_height + spaceBetween);
+                Vector2Int door = new Vector2Int(UnityEngine.Random.Range(startContext.x, endContext.x), splitLocation);
+                while(DoorOverlapping(splitLocation, splitHorizonal))
+                {
+                    brek_2++;
+                    if (brek_2 >= FORCE_BREAK_2)
+                    {
+                        Debug.Log("Force2:");
+                        return;
+                    }
+                    splitLocation = (int)Random.Range(startContext.y + min_room_height, endContext.y - min_room_height + spaceBetween);
+                }
 
-                leftNode = new RoomNode(startContext, new Vector2Int(endContext.x, splitLocation - 1)); // Down
-                rightNode = new RoomNode(new Vector2Int(startContext.x, splitLocation + 1), endContext); // Up
+                if (this.listDoors.Count == 0)
+                { // First division
+                    this.listDoors.Add(door);
+                    leftNode = new RoomNode(startContext, new Vector2Int(endContext.x, splitLocation - spaceBetween), this.listDoors); // Down
+                    rightNode = new RoomNode(new Vector2Int(startContext.x, splitLocation + spaceBetween), endContext, this.listDoors); // Up
+                }
+                else
+                {
+                    this.listDoors.Add(door);
+                    List<Vector2Int> LeftList = new List<Vector2Int>();
+                    List<Vector2Int> RightList = new List<Vector2Int>();
+                    foreach (Vector2Int puerta in new List<Vector2Int>(this.listDoors))
+                    {
+                        if (splitLocation < puerta.y)
+                        {
+                            RightList.Add(puerta);
+                        }
+                        else if (splitLocation > puerta.y)
+                        {
+                            LeftList.Add(puerta);
+                        }
+                        if (splitLocation == puerta.y)
+                        {
+                            RightList.Add(puerta);
+                            LeftList.Add(puerta);
+                        }
+
+                    }
+                    leftNode = new RoomNode(startContext, new Vector2Int(endContext.x, splitLocation - spaceBetween), LeftList); // Down
+                    rightNode = new RoomNode(new Vector2Int(startContext.x, splitLocation + spaceBetween), endContext, RightList); // Up
+
+                }
+
 
             }
             else
             {
-                splitLocation = (int)Random.Range(startContext.x + min_room_width, endContext.x - min_room_width + 1);
+                splitLocation = (int)Random.Range(startContext.x + min_room_width, endContext.x - min_room_width + spaceBetween);
+                Vector2Int door = new Vector2Int(splitLocation, UnityEngine.Random.Range(startContext.y, endContext.y));
 
-                //Debug.Log("Corte Vertical en:" + splitLocation + ",Soy[" + startContext + "," + endContext + "]");
-                //Debug.Log("Se va a crear izq:" + startContext + "X" + new Vector2Int(splitLocation - 1, endContext.y));
-                //Debug.Log("Se va a crear der:" + new Vector2Int(splitLocation + 1, startContext.y) + "X" + endContext);
+                while (DoorOverlapping(splitLocation, splitHorizonal))
+                {
+                    brek_2++;
+                    if (brek_2 >= FORCE_BREAK_2)
+                    {
+                        Debug.Log("Force2:");
+                        return;
+                    }
+                    splitLocation = (int)Random.Range(startContext.x + min_room_width, endContext.x - min_room_width + spaceBetween);
+                }
 
-                leftNode = new RoomNode(startContext, new Vector2Int(splitLocation - 1, endContext.y)); // Left
-                rightNode = new RoomNode(new Vector2Int(splitLocation + 1, startContext.y), endContext); // Right
+                if (this.listDoors.Count == 0)
+                { // First division
+                    this.listDoors.Add(door);
+                    leftNode = new RoomNode(startContext, new Vector2Int(splitLocation - spaceBetween, endContext.y), this.listDoors); // Left
+                    rightNode = new RoomNode(new Vector2Int(splitLocation + spaceBetween, startContext.y), endContext, this.listDoors); // Right
+                }
+                else
+                {
+                    this.listDoors.Add(door);
+                    List<Vector2Int> LeftList = new List<Vector2Int>();
+                    List<Vector2Int> RightList = new List<Vector2Int>();
+
+                    foreach(Vector2Int puerta in new List<Vector2Int>(this.listDoors))
+                    {
+                        if (splitLocation < puerta.x)
+                        {
+                            RightList.Add(puerta);
+                        }
+                        else if(splitLocation > puerta.x)
+                        {
+                            LeftList.Add(puerta);
+                        }
+                        if(splitLocation == puerta.x)
+                        {
+                            RightList.Add(puerta);
+                            LeftList.Add(puerta);
+                        }
+                            
+                    }
+                    leftNode = new RoomNode(startContext, new Vector2Int(splitLocation - spaceBetween, endContext.y), LeftList); // Left
+                    rightNode = new RoomNode(new Vector2Int(splitLocation + spaceBetween, startContext.y), endContext, RightList); // Right
+                }
+
+                
+            }
+        }
+
+        private bool DoorOverlapping(int splitLocation, bool horizontalSplit)
+        {
+            bool isOverlapping = false;
+            foreach (Vector2Int door in listDoors)
+            {
+
+                if (horizontalSplit && door.y == splitLocation
+                    || !horizontalSplit && door.x == splitLocation)
+                {
+                    isOverlapping = true;
+                    break;
+                }
+            }
+            return isOverlapping;
+        }
+
+        private void ConnectRoomToDoor(Room room, Vector2Int door)
+        {
+            return;
+            // Door aligns vertically with room
+            if (room.getStartHousePosition().x <= door.x && room.getStartHousePosition().x + room.getHouseSize().x -1>= door.x)
+            {
+                if(room.getStartHousePosition().y < door.y)
+                {
+                    for (int index = door.y; index > room.getStartHousePosition().y; index--)
+                    {
+                        map[door.x, index] = true;
+                    }
+                }
+                else
+                {
+                    // The door is right down from the room
+                    for(int index = door.y; index < room.getStartHousePosition().y; index++) 
+                    { 
+                        map[door.x, index] = true;
+                    }
+                }
+                return;
             }
 
-            // Joining rooms
+            // Door aligns horizontally with room
+            if (room.getStartHousePosition().y <= door.y && room.getStartHousePosition().y + room.getHouseSize().y -1 >= door.y)
+            {
+                if (room.getStartHousePosition().x < door.x)
+                {
+                    // The door is right up from the room
+                    for (int index = door.x; index > room.getStartHousePosition().x; index--)
+                    {
+                        map[index, door.y] = true;
+                    }
+                }
+                else
+                {
+
+                    for (int index = door.x; index < room.getStartHousePosition().x; index++)
+                    {
+                        map[index, door.y] = true;
+                    }
+                }
+                return;
+            }
+            // Room is not align with door
+            for(int i = Mathf.Min(room.getHouseCenter().x, door.x); i < Mathf.Max(room.getHouseCenter().x, door.x); i++)
+            {
+                map[i, door.y] = true;
+            }
+
+            for (int i = Mathf.Min(room.getHouseCenter().y, door.y); i < Mathf.Max(room.getHouseCenter().y, door.y); i++)
+            {
+                map[door.x,i] = true;
+            }
 
         }
-
-        public Dungeon GetMap()
-        {
-            return this.spaceContext;
-        }
-
-        public bool IsLeaf() { return iamleaf; }
-
-        public Vector2 GetHouseStartPosition() { return this.room.getStartHousePosition(); }
-        public Vector2 GetHouseSize() { return this.room.getHouseSize(); }
+        private int getHeightContext() { return endContext.y - startContext.y + 1 /*+1 is because we need to count the first one also*/ ; }
+        private int getWidthContext() { return endContext.x - startContext.x + 1; /*+1 is because we need to count the first one also*/}
 
         public static void SetHouseProperties(int min_room_height, int max_room_width, int min_room_width, int max_room_height)
         {
@@ -169,60 +314,14 @@ public class BSPTree : GenerationAlgorithm
         private Vector2Int startHousePosition;  // Height x Width
         private Vector2Int houseSize;   // sizes in width x height
 
-        private List<Vector2Int> roomPivotes; // Corners of the house.
-        // 1. Left - Down
-        // 2. Left - Up
-        // 3. Right - Down
-        // 4. Right -Up
-
-
-
         public Room(Vector2Int startPos, Vector2Int houseSize)
         {
             this.startHousePosition = new Vector2Int(startPos.x, startPos.y);
             this.houseSize = new Vector2Int(houseSize.x, houseSize.y);
-            roomPivotes = new List<Vector2Int>()
-            { 
-                new Vector2Int(startHousePosition.x, startHousePosition.y),
-                new Vector2Int(startHousePosition.x, startHousePosition.y + houseSize.y), 
-                new Vector2Int(startHousePosition.x + houseSize.x, startHousePosition.y),
-                new Vector2Int(startHousePosition.x + houseSize.x, startHousePosition.y + houseSize.y)
-
-            };
         }
-        /// <summary>
-        /// Returns the position where the room is placed. Height is X-axe, and width is Y-axe
-        /// </summary>
-        /// <param name="startPos"></param>
-        public void setStartHousePosition(Vector2Int startPos)
-        {
-            this.startHousePosition = new Vector2Int(startPos.x, startPos.y);
-        }
-        public void setHouseSize(Vector2Int houseSize)
-        {
-            this.houseSize = new Vector2Int(houseSize.x, houseSize.y);
-        }
-
         public Vector2Int getStartHousePosition() { return this.startHousePosition; }
         public Vector2Int getHouseSize() { return this.houseSize; }
-        /// <summary>
-        /// Return the corners of the house. The order is the following
-        /// 1. Left - Down
-        /// 2. Left - Up
-        /// 3. Right - Down
-        /// 4. Right -Up
-        /// </summary>
-        /// <returns></returns>
-        public List<Vector2Int> getPivotList() { return this.roomPivotes; }
-    }
-
-    private class Tunnel
-    {
-        public List<Vector2Int> positions;
-        public Tunnel()
-        {
-            this.positions = new List<Vector2Int>();
-        }
+        public Vector2Int getHouseCenter() { return new Vector2Int((getStartHousePosition().x+getHouseSize().x-1)/2, (getStartHousePosition().y + getHouseSize().y - 1) / 2); }
     }
 
     private void OnDrawGizmosSelected()
