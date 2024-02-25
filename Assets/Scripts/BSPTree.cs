@@ -1,8 +1,10 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
+using static UnityEditor.PlayerSettings;
 
-// 12 12 2 2 2 2  -1690281877 bug
+// 12 12 2 2 2 2 1690281877 bug
+// 12 12 2 2 2 2 1657482666
 
 public class BSPTree : GenerationAlgorithm
 {
@@ -17,18 +19,33 @@ public class BSPTree : GenerationAlgorithm
     public int heightMap;  // Number of rows in the map
 
     private bool[,] map;
+    private RoomNode.TYPE_CELL[,] debugmap;
 
     public void Generate(int seed = -1)
     {
         this.seed = seed;
         GenerateSeed(seed);
         map = new bool[widthMap, heightMap];
+        this.debugmap = new RoomNode.TYPE_CELL[widthMap, heightMap];
+        for(int i = 0; i < widthMap; i++)
+        {
+            for(int j = 0; j < heightMap; j++)
+            {
+                this.debugmap[i,j] = RoomNode.TYPE_CELL.SALA;
+            }
+        }
 
         RoomNode.SetHouseProperties(min_room_height, max_room_width, min_room_width, max_room_height);
         RoomNode.map = map;
+
+        RoomNode.debugList = this.debugmap;
+        
+
+
         Debug.Log("s:" + this.seed);
         RoomNode a = new RoomNode(new Vector2Int(0,0), new Vector2Int(widthMap - 1, heightMap - 1), new List<Vector2Int>());
         this.map = RoomNode.map;
+        this.debugmap = RoomNode.debugList;
     }
     private class RoomNode
     {
@@ -37,6 +54,11 @@ public class BSPTree : GenerationAlgorithm
         public static int max_room_width;
         public static int min_room_height;
         public static int max_room_height;
+
+        // Debugging Data
+        public enum TYPE_CELL { PASILLO, SALA, PUERTA}
+        public static TYPE_CELL[,] debugList; 
+
 
         // Child nodes
         private RoomNode leftNode;
@@ -133,7 +155,9 @@ public class BSPTree : GenerationAlgorithm
                         return;
                     }
                     splitLocation = (int)Random.Range(startContext.y + min_room_height, endContext.y - min_room_height + spaceBetween);
+                    door = new Vector2Int(UnityEngine.Random.Range(startContext.x, endContext.x), splitLocation);
                 }
+                debugList[door.x, door.y] = TYPE_CELL.PUERTA;
 
                 if (this.listDoors.Count == 0)
                 { // First division
@@ -184,7 +208,11 @@ public class BSPTree : GenerationAlgorithm
                         return;
                     }
                     splitLocation = (int)Random.Range(startContext.x + min_room_width, endContext.x - min_room_width + spaceBetween);
+                    door = new Vector2Int(UnityEngine.Random.Range(startContext.x, endContext.x), splitLocation);
                 }
+                debugList[door.x, door.y] = TYPE_CELL.PUERTA;
+                
+                
 
                 if (this.listDoors.Count == 0)
                 { // First division
@@ -241,7 +269,6 @@ public class BSPTree : GenerationAlgorithm
 
         private void ConnectRoomToDoor(Room room, Vector2Int door)
         {
-            return;
             // Door aligns vertically with room
             if (room.getStartHousePosition().x <= door.x && room.getStartHousePosition().x + room.getHouseSize().x -1>= door.x)
             {
@@ -262,7 +289,7 @@ public class BSPTree : GenerationAlgorithm
                 }
                 return;
             }
-
+            
             // Door aligns horizontally with room
             if (room.getStartHousePosition().y <= door.y && room.getStartHousePosition().y + room.getHouseSize().y -1 >= door.y)
             {
@@ -284,15 +311,28 @@ public class BSPTree : GenerationAlgorithm
                 }
                 return;
             }
+           
             // Room is not align with door
-            for(int i = Mathf.Min(room.getHouseCenter().x, door.x); i < Mathf.Max(room.getHouseCenter().x, door.x); i++)
+            for(int i = Mathf.Min(room.getHouseCenter().x, door.x); i <= Mathf.Max(room.getHouseCenter().x, door.x); i++)
             {
-                map[i, door.y] = true;
+                map[i, Mathf.Min(room.getHouseCenter().y, door.y)] = true;
             }
 
-            for (int i = Mathf.Min(room.getHouseCenter().y, door.y); i < Mathf.Max(room.getHouseCenter().y, door.y); i++)
+            
+            if(room.getHouseCenter().x < door.x && room.getHouseCenter().y < door.y ||
+                room.getHouseCenter().x > door.x && room.getHouseCenter().y > door.y)
             {
-                map[door.x,i] = true;
+                for (int i = Mathf.Min(room.getHouseCenter().y, door.y); i <= Mathf.Max(room.getHouseCenter().y, door.y); i++)
+                {
+                    map[Mathf.Max(room.getHouseCenter().x, door.x), i] = true;
+                }
+            }
+            else
+            {
+                for (int i = Mathf.Min(room.getHouseCenter().y, door.y); i <= Mathf.Max(room.getHouseCenter().y, door.y); i++)
+                {
+                    map[Mathf.Min(room.getHouseCenter().x, door.x), i] = true;
+                }
             }
 
         }
@@ -321,7 +361,8 @@ public class BSPTree : GenerationAlgorithm
         }
         public Vector2Int getStartHousePosition() { return this.startHousePosition; }
         public Vector2Int getHouseSize() { return this.houseSize; }
-        public Vector2Int getHouseCenter() { return new Vector2Int((getStartHousePosition().x+getHouseSize().x-1)/2, (getStartHousePosition().y + getHouseSize().y - 1) / 2); }
+        public Vector2Int getHouseCenter() { return new Vector2Int((int)System.Math.Truncate((System.Decimal)(getStartHousePosition().x + (getStartHousePosition().x + getHouseSize().x - 1)) / 2),
+            (int)System.Math.Truncate((System.Decimal)(getStartHousePosition().y + (getStartHousePosition().y + getHouseSize().y - 1)) / 2)); }
     }
 
     private void OnDrawGizmosSelected()
@@ -333,10 +374,26 @@ public class BSPTree : GenerationAlgorithm
                 {
                     try
                     {
-                        if (this.map[j, i])
+                        
+                        if (this.map[j, i]) { 
                             Gizmos.color = Color.black;
+                            switch (debugmap[j, i])
+                            {
+                                case RoomNode.TYPE_CELL.PASILLO:
+                                    Gizmos.color = Color.blue;
+                                    break;
+                                case RoomNode.TYPE_CELL.PUERTA:
+                                    Gizmos.color = Color.black;
+                                    break;
+                                default:
+                                    Gizmos.color = Color.black;
+                                    break;
+                            }
+                        }
                         else
                             Gizmos.color = Color.white;
+
+                        
                         Gizmos.DrawCube(new Vector3(tileSize * j + 0.5f, tileSize * i + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
                     }
                     catch
