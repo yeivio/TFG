@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using static UnityEditor.PlayerSettings;
 
-// 12 12 2 2 2 2 1690281877 bug
-// 12 12 2 2 2 2 1657482666
+// 20 20 2 8 2 8 90139017 bug
 
 public class BSPTree : GenerationAlgorithm
 {
@@ -208,7 +207,7 @@ public class BSPTree : GenerationAlgorithm
                         return;
                     }
                     splitLocation = (int)Random.Range(startContext.x + min_room_width, endContext.x - min_room_width + spaceBetween);
-                    door = new Vector2Int(UnityEngine.Random.Range(startContext.x, endContext.x), splitLocation);
+                    door = new Vector2Int(splitLocation, UnityEngine.Random.Range(startContext.x, endContext.x));
                 }
                 debugList[door.x, door.y] = TYPE_CELL.PUERTA;
                 
