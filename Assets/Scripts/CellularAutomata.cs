@@ -7,13 +7,7 @@ using Unity.VisualScripting;
 public class CellularAutomata : GenerationAlgorithm
 {
 
-    #region Gizmo Settings
-    [Header("DRAWING OPTIONS")]
-    public int widthMap;   // Number of columns in the map
-    public int heightMap;  // Number of rows in the map
-    public int tileSize;    // Size of each tile on the canvas
-    public long executionTime;
-    #endregion   
+    //True = pared
 
     #region CELLULAR SETTINGS
     public float chanceToStartAsWall; // Chance to start as a Wall
@@ -26,20 +20,18 @@ public class CellularAutomata : GenerationAlgorithm
 
     private List<List<Coords>> wallRegions;
     private List<List<Coords>> roomRegions;
-    private bool[,] map;
-    private bool canDraw;
-
-    private enum CELL_TYPE { WALL, ROOM };
 
     public virtual bool[,] Generate(int seed = -1)
     {
-        canDraw = false;
-        map = new bool[widthMap, heightMap];
+
+        map = new CELL_TYPE[widthMap, heightMap];
         this.seed = seed;
         GenerateSeed(seed);
+
         var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
 
         GenerateRandomStart();
+
         for (int i = 0; i < this.numberSteps; i++)
         {
             simulationStep();
@@ -49,10 +41,9 @@ public class CellularAutomata : GenerationAlgorithm
 
         watch.Stop();
         executionTime = watch.ElapsedMilliseconds;
-        canDraw = true;
-        if(GetAllRegionsOfType(false).Count > 1)
-            Debug.LogError(GetAllRegionsOfType(false).Count + "," + this.seed);
-        return new bool[widthMap,heightMap];
+        if (GetAllRegionsOfType(CELL_TYPE.FLOOR).Count > 1)
+            Debug.LogError("CellularAutomata:" + this.seed);
+        return new bool[widthMap, heightMap];
     }
 
 
@@ -62,7 +53,9 @@ public class CellularAutomata : GenerationAlgorithm
         for (int x = 0; x < widthMap; x++) // Ancho de filas
             for (int y = 0; y < heightMap; y++) // Ancho de columnas
                 if (UnityEngine.Random.Range(0.0f, 1.0f) <= chanceToStartAsWall)
-                    map[x, y] = true;
+                    map[x, y] = CELL_TYPE.WALL;
+                else
+                    map[x, y] = CELL_TYPE.FLOOR;
     }
 
     protected int CountNearWalls(int x, int y, int radius)
@@ -75,14 +68,16 @@ public class CellularAutomata : GenerationAlgorithm
                 int casillaX = x + i;
                 int casillaY = y + j;
 
-                if (i == 0 && j == 0) { /* We are on the central position */ }
+                if (i == 0 && j == 0)
+                { /* We are on the central position */
+                }
 
                 else if (casillaX < 0 || casillaX >= this.widthMap
                         || casillaY < 0 || casillaY >= this.heightMap)
                 {
                     contador++; // Out of bounds count as walls
                 }
-                else if (map[casillaX, casillaY])
+                else if (map[casillaX, casillaY] == CELL_TYPE.WALL)
                 {
                     contador++;
                 }
@@ -90,32 +85,32 @@ public class CellularAutomata : GenerationAlgorithm
 
         return contador;
     }
-    protected virtual bool[,] simulationStep()
+    protected virtual CELL_TYPE[,] simulationStep()
     {
-        bool[,] copyMap = new bool[this.widthMap, this.heightMap];
+        CELL_TYPE[,] copyMap = new CELL_TYPE[this.widthMap, this.heightMap];
         for (int x = 0; x < this.widthMap; x++)
         {
             for (int y = 0; y < this.heightMap; y++)
             {
                 if (x - 1 < 0 || x + 1 == this.widthMap || y - 1 < 0 || y + 1 >= this.heightMap) // If we are limit walls, we can't be empty
                 {
-                    copyMap[x, y] = true;
+                    copyMap[x, y] = CELL_TYPE.WALL;
                     continue;
                 }
                 int numWalls = this.CountNearWalls(x, y, 2);
-                if (this.map[x, y])
+                if (this.map[x, y] == CELL_TYPE.WALL)
                 {
                     if (numWalls < MIN_CONVERSION_WALL)
-                        copyMap[x, y] = false;
+                        copyMap[x, y] = CELL_TYPE.FLOOR;
                     else
-                        copyMap[x, y] = true;
+                        copyMap[x, y] = CELL_TYPE.WALL;
                 }
                 else
                 {
                     if (numWalls > MIN_CONVERSION_BLANK || numWalls == 0)
-                        copyMap[x, y] = true;
+                        copyMap[x, y] = CELL_TYPE.WALL;
                     else
-                        copyMap[x, y] = false;
+                        copyMap[x, y] = CELL_TYPE.FLOOR;
                 }
             }
         }
@@ -125,7 +120,7 @@ public class CellularAutomata : GenerationAlgorithm
 
     public void FilteringProcess(int thresholdWalls, int thresholdRooms)
     {
-        wallRegions = GetAllRegionsOfType(true);
+        wallRegions = GetAllRegionsOfType(CELL_TYPE.WALL);
 
         foreach (List<Coords> region in new List<List<Coords>>(wallRegions))
         {
@@ -133,28 +128,28 @@ public class CellularAutomata : GenerationAlgorithm
             {
                 foreach (Coords coord in region)
                 {
-                    map[coord.X, coord.Y] = false;
+                    map[coord.X, coord.Y] = CELL_TYPE.FLOOR;
                 }
 
                 wallRegions.Remove(region);
             }
         }
 
-        roomRegions = GetAllRegionsOfType(false);
+        roomRegions = GetAllRegionsOfType(CELL_TYPE.FLOOR);
         foreach (List<Coords> region in new List<List<Coords>>(roomRegions))
         {
             if (region.Count <= thresholdRooms)
             {
                 foreach (Coords coord in region)
                 {
-                    map[coord.X, coord.Y] = true;
+                    map[coord.X, coord.Y] = CELL_TYPE.WALL;
                 }
                 roomRegions.Remove(region);
             }
         }
     }
 
-    private List<List<Coords>> GetAllRegionsOfType(bool isWall)
+    private List<List<Coords>> GetAllRegionsOfType(CELL_TYPE type)
     {
         List<List<Coords>> coordsLists = new List<List<Coords>>();
         bool[,] controlMap = new bool[widthMap, heightMap];
@@ -163,7 +158,7 @@ public class CellularAutomata : GenerationAlgorithm
         {
             for (int y = 0; y < heightMap; y++)
             {
-                if (!controlMap[x, y] && this.map[x, y] == isWall)
+                if (!controlMap[x, y] && this.map[x, y] == type)
                 {
 
                     List<Coords> reg = ExpandRegion(x, y);
@@ -179,8 +174,8 @@ public class CellularAutomata : GenerationAlgorithm
     }
 
     /// <summary>
-    /// Given two coordinates on the map, this function starts expanding from that point until reaching a limit of
-    /// the map, or encounters cells which are not the same type as the original one. 
+    /// Given two coordinates on the cellMap, this function starts expanding from that point until reaching a limit of
+    /// the cellMap, or encounters cells which are not the same type as the original one. 
     /// </summary>
     /// <param name="firstX"></param>
     /// <param name="firstY"></param>
@@ -191,7 +186,7 @@ public class CellularAutomata : GenerationAlgorithm
         List<Coords> regionCoords = new List<Coords>();
         bool[,] controlMap = new bool[widthMap, heightMap];
         Queue<Coords> coordsQueue = new Queue<Coords>();
-        bool cellType = map[firstX, firstY];
+        CELL_TYPE cellType = map[firstX, firstY];
 
         coordsQueue.Enqueue(new Coords(firstX, firstY));
         while (coordsQueue.Count != 0)
@@ -255,11 +250,9 @@ public class CellularAutomata : GenerationAlgorithm
 
             for (int i = 0; i < regionsList.Count; i++)
             {
-                //Debug.Log("Se accede:" + index + "," + secondIndex);
                 if (distanceMatrix[index, i].distance == 0 || regionsList[index].getConnectedList().Contains(regionsList[i])
                     || usedIndex.Contains(i))
                 {
-                    //Debug.Log("Es igual:" + index + "," + i);
                     continue;
                 }
 
@@ -379,7 +372,7 @@ public class CellularAutomata : GenerationAlgorithm
 
                         if (drawX >= 0 && drawX < widthMap && drawY >= 0 && drawY <= heightMap)
                         {
-                            map[drawX, drawY] = false;
+                            map[drawX, drawY] = CELL_TYPE.FLOOR;
                         }
                     }
                 }
@@ -436,8 +429,8 @@ public class CellularAutomata : GenerationAlgorithm
         private List<Coords> regionCoords;
         private List<Coords> borderCoords;
         private List<Region> connectedRegion;
-        private bool[,] map;
-        public Region(List<Coords> regionCoords, bool[,] map)
+        private CELL_TYPE[,] map;
+        public Region(List<Coords> regionCoords, CELL_TYPE[,] map)
         {
             this.regionCoords = regionCoords;
             this.connectedRegion = new List<Region>();
@@ -469,7 +462,7 @@ public class CellularAutomata : GenerationAlgorithm
                     {
                         contador++; // Out of bounds count as walls
                     }
-                    else if (map[casillaX, casillaY])
+                    else if (map[casillaX, casillaY] == CELL_TYPE.WALL)
                     {
                         contador++;
                     }
@@ -509,23 +502,34 @@ public class CellularAutomata : GenerationAlgorithm
     {
         if (Application.isPlaying)
             return;
-        if (this.map != null && canDraw )
+        if (this.map != null)
         {
-            for (int i = 0; i < heightMap; i++)
-                for (int j = 0; j < widthMap; j++)
+            for (int i = 0; i < widthMap; i++)
+                for (int j = 0; j < heightMap; j++)
                 {
                     try
                     {
-                        if (map[j, i])
-                            Gizmos.color = Color.black;
-                        else
-                            Gizmos.color = Color.white;
-                        Gizmos.DrawCube(new Vector3(tileSize * j + 0.5f, tileSize * i + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
+                        switch (map[i, j])
+                        {
+                            case CELL_TYPE.WALL:
+                                Gizmos.color = Color.black;
+                                break;
+                            case CELL_TYPE.FLOOR:
+                                Gizmos.color = Color.white;
+                                break;
+                            case CELL_TYPE.CORRIDOR:
+                                Gizmos.color = Color.grey;
+                                break;
+                            case CELL_TYPE.NOTHING:
+                                Gizmos.color = Color.red;
+                                break;
+                        }
+                        Gizmos.DrawCube(new Vector3(tileSize * i + 0.5f, tileSize * j + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
                     }
                     catch
                     {
-                        Gizmos.color = Color.gray;
-                        Gizmos.DrawCube(new Vector3(tileSize * j + 0.5f, tileSize * i + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
+                        Gizmos.color = Color.magenta;
+                        Gizmos.DrawCube(new Vector3(tileSize * i + 0.5f, tileSize * j + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
                     }
                 }
         }
@@ -562,9 +566,8 @@ public class ScriptEditorCA : Editor
         if (GUILayout.Button("Generate cellular automata"))
         {
             gizmoDrawing.Generate(gizmoDrawing.seed);
-            
-        }
 
+        }
         if (GUILayout.Button("Generate random cellular automata"))
         {
             gizmoDrawing.Generate();

@@ -286,11 +286,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83f1e4c8192e6af4ebcfef9c32c175db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  seed: -1045109446
   widthMap: 100
   heightMap: 100
   tileSize: 1
   executionTime: 0
+  seed: -1045109446
   threshold: 50
 --- !u!4 &560063859
 Transform:
@@ -351,11 +351,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5efc36396e0f4db4b826f53eba377966, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  seed: 0
-  widthMap: 2
-  heightMap: 2
+  widthMap: 33
+  heightMap: 54
   tileSize: 1
   executionTime: 0
+  seed: 0
   usableTiles:
   - {fileID: 6908105143622699393, guid: 19121c40fff4e6f49a38fa5f45bc0198, type: 3}
   - {fileID: 481551587826182200, guid: 151ede3256997384d91a8e26ba8ffed0, type: 3}
@@ -419,11 +419,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63730ecd0f9d6bd46b707d8d40fbac95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  seed: 1680397966
   widthMap: 2
   heightMap: 2
   tileSize: 1
   executionTime: 0
+  seed: 1680397966
   usableTiles:
   - {fileID: 6908105143622699393, guid: 19121c40fff4e6f49a38fa5f45bc0198, type: 3}
   - {fileID: 481551587826182200, guid: 151ede3256997384d91a8e26ba8ffed0, type: 3}
@@ -469,17 +469,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b165e9d48da5e447a0f5b14793116aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  seed: -1051355135
-  widthMap: 103
-  heightMap: 108
+  widthMap: 100
+  heightMap: 100
   tileSize: 1
-  executionTime: 596
-  chanceToStartAsWall: 0.154
-  numberSteps: 2
-  MIN_CONVERSION_WALL: 3
-  MIN_CONVERSION_BLANK: 3
-  wallSizeThreshold: 15
-  roomSizeThreshold: 12
+  executionTime: 275
+  seed: -1531863337
+  chanceToStartAsWall: 0.179
+  numberSteps: 1
+  MIN_CONVERSION_WALL: 2
+  MIN_CONVERSION_BLANK: 2
+  wallSizeThreshold: 46
+  roomSizeThreshold: 70
 --- !u!4 &719744467
 Transform:
   m_ObjectHideFlags: 0
@@ -505,6 +505,7 @@ GameObject:
   m_Component:
   - component: {fileID: 777530354}
   - component: {fileID: 777530353}
+  - component: {fileID: 777530355}
   m_Layer: 0
   m_Name: BSPTree
   m_TagString: Untagged
@@ -524,15 +525,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ae0dcbf3397fa14295acd5d70749fdd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  seed: -1751140766
+  widthMap: 48
+  heightMap: 46
+  tileSize: 1
+  executionTime: 0
+  seed: 511618926
   min_room_width: 2
   max_room_width: 8
   min_room_height: 2
   max_room_height: 8
-  tileSize: 1
-  executionTime: 0
-  widthMap: 110
-  heightMap: 167
 --- !u!4 &777530354
 Transform:
   m_ObjectHideFlags: 0
@@ -548,6 +549,79 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &777530355
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 777530352}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 361cfac804ec5f846afc123f1bd1902d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  min_room_width: 2
+  max_room_width: 8
+  min_room_height: 2
+  max_room_height: 8
+  tileSize: 1
+  executionTime: 0
+  widthMap: 32
+  heightMap: 23
+  seed: 764244185
+--- !u!1 &923939318
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 923939320}
+  - component: {fileID: 923939321}
+  m_Layer: 0
+  m_Name: WFC-Painting
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &923939320
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 923939318}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 23.73035, y: 19.2629, z: 43.070522}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &923939321
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 923939318}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc1d169cf578de8428d18716f677cadf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  widthMap: 0
+  heightMap: 0
+  tileSize: 1
+  executionTime: 0
+  seed: 0
+  baseMap: {fileID: 0}
+  usableTiles: []
+  DefaultTile: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -558,3 +632,4 @@ SceneRoots:
   - {fileID: 777530354}
   - {fileID: 625730274}
   - {fileID: 625384078}
+  - {fileID: 923939320}

@@ -12,8 +12,8 @@ public class BSPPartition
     public int max_room_height;
     public int tileSize;    // Size of each tile on the canvas
     public long executionTime;
-    public int widthMap;   // Number of columns in the map
-    public int heightMap;  // Number of rows in the map
+    public int widthMap;   // Number of columns in the cellMap
+    public int heightMap;  // Number of rows in the cellMap
 
 
 

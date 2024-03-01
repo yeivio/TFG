@@ -12,8 +12,8 @@ public class GizmoDrawing : MonoBehaviour
 
     #region Gizmo Settings
     [Header("DRAWING OPTIONS")]
-    public int mapWidth;   // Number of columns in the map
-    public int mapHeight;  // Number of rows in the map
+    public int mapWidth;   // Number of columns in the cellMap
+    public int mapHeight;  // Number of rows in the cellMap
     public int tileSize;    // Size of each tile on the canvas
     public float executionTime;
     #endregion
@@ -76,7 +76,7 @@ public class GizmoDrawing : MonoBehaviour
         //this.mapValue = tree.Generate(this.mapWidth, this.mapHeight, min_room_width, min_room_height,max_room_width, max_room_height, seed);
         watch.Stop();
         executionTime = watch.ElapsedMilliseconds;
-        this.seed = tree.getSeed();
+        this.seed = tree.seed;
     }
 
     public void GenerateRandomBSP()
@@ -86,7 +86,7 @@ public class GizmoDrawing : MonoBehaviour
         //this.mapValue = tree.Generate(this.mapWidth, this.mapHeight, min_room_width, min_room_height, max_room_width, max_room_height);
         watch.Stop();
         executionTime = watch.ElapsedMilliseconds;
-        this.seed = tree.getSeed();
+        this.seed = tree.seed;
     }
 
 

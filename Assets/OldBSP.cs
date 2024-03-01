@@ -1,37 +1,73 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
+using static UnityEditor.PlayerSettings;
+using System;
 
-public class BSPTree : GenerationAlgorithm
+// 32 23 2 8 2 8 2078241032 bug
+public class OldBSP: MonoBehaviour
 {
     [Header("OPTIONS FOR BSPTree")]
     public int min_room_width;
     public int max_room_width;
     public int min_room_height;
     public int max_room_height;
-
+    public int tileSize;    // Size of each tile on the canvas
+    public long executionTime;
+    public int widthMap;   // Number of columns in the map
+    public int heightMap;  // Number of rows in the map
+    public int seed;
+    private bool[,] map;
+    private RoomNode.TYPE_CELL[,] debugmap;
+    protected void GenerateSeed(int seed = -1)
+    {
+        int tempSeed = (int)DateTime.Now.Ticks;
+        if (seed == -1) // No seed 
+        {
+            UnityEngine.Random.InitState(tempSeed);
+            this.seed = tempSeed;
+        }
+        else
+            UnityEngine.Random.InitState(seed);
+    }
     public void Generate(int seed = -1)
     {
         this.seed = seed;
         GenerateSeed(seed);
-        map = new CELL_TYPE[widthMap, heightMap];
+        map = new bool[widthMap, heightMap];
+        this.debugmap = new RoomNode.TYPE_CELL[widthMap, heightMap];
+        for (int i = 0; i < widthMap; i++)
+        {
+            for (int j = 0; j < heightMap; j++)
+            {
+                this.debugmap[i, j] = RoomNode.TYPE_CELL.SALA;
+            }
+        }
 
         RoomNode.SetHouseProperties(min_room_height, max_room_width, min_room_width, max_room_height);
         RoomNode.map = map;
+
+        RoomNode.debugList = this.debugmap;
 
 
 
         Debug.Log("s:" + this.seed);
         RoomNode a = new RoomNode(new Vector2Int(0, 0), new Vector2Int(widthMap - 1, heightMap - 1), new List<Vector2Int>());
         this.map = RoomNode.map;
+        this.debugmap = RoomNode.debugList;
     }
     private class RoomNode
     {
-        public static CELL_TYPE[,] map;
+        public static bool[,] map;
         public static int min_room_width;
         public static int max_room_width;
         public static int min_room_height;
         public static int max_room_height;
+
+        // Debugging Data
+        public enum TYPE_CELL { PASILLO, SALA, PUERTA }
+        public static TYPE_CELL[,] debugList;
+
 
         // Child nodes
         private RoomNode leftNode;
@@ -78,11 +114,11 @@ public class BSPTree : GenerationAlgorithm
             else
             {
                 //Draw room when you can't divide
-                int houseWidth = Random.Range(min_room_width, Mathf.Min(max_room_width, getWidthContext()) + 1);
-                int houseHeight = Random.Range(min_room_height, Mathf.Min(max_room_height, getHeightContext()) + 1);
+                int houseWidth = UnityEngine.Random.Range(min_room_width, Mathf.Min(max_room_width, getWidthContext()) + 1);
+                int houseHeight = UnityEngine.Random.Range(min_room_height, Mathf.Min(max_room_height, getHeightContext()) + 1);
 
-                int startWidth = Random.Range(startContext.x, startContext.x + (getWidthContext() - houseWidth));
-                int startheight = Random.Range(startContext.y, startContext.y + (getHeightContext() - houseHeight));
+                int startWidth = UnityEngine.Random.Range(startContext.x, startContext.x + (getWidthContext() - houseWidth));
+                int startheight = UnityEngine.Random.Range(startContext.y, startContext.y + (getHeightContext() - houseHeight));
 
                 this.room = new Room(new Vector2Int(startWidth, startheight), new Vector2Int(houseWidth, houseHeight));
                 for (int i = room.getHouseSize().x; i > 0; i--)
@@ -90,7 +126,7 @@ public class BSPTree : GenerationAlgorithm
                     for (int j = room.getHouseSize().y; j > 0; j--)
                     {
 
-                        map[room.getStartHousePosition().x - 1 + i, room.getStartHousePosition().y - 1 + j] = CELL_TYPE.FLOOR;
+                        map[room.getStartHousePosition().x - 1 + i, room.getStartHousePosition().y - 1 + j] = true;
                     }
                 }
 
@@ -108,7 +144,7 @@ public class BSPTree : GenerationAlgorithm
             if (((float)getHeightContext() / 2) > min_room_height + numDoors &&
                 ((float)getWidthContext() / 2) > min_room_width + numDoors)
             {
-                splitHorizonal = Random.Range(0.0f, 1.0f) > 0.5;    //Random election
+                splitHorizonal = UnityEngine.Random.Range(0.0f, 1.0f) > 0.5;    //Random election
             }
             else
             {
@@ -117,7 +153,7 @@ public class BSPTree : GenerationAlgorithm
 
             if (splitHorizonal)
             {
-                splitLocation = (int)Random.Range(startContext.y + min_room_height, endContext.y - min_room_height + spaceBetween);
+                splitLocation = (int)UnityEngine.Random.Range(startContext.y + min_room_height, endContext.y - min_room_height + spaceBetween);
                 Vector2Int door = new Vector2Int(UnityEngine.Random.Range(startContext.x, endContext.x), splitLocation);
                 while (DoorOverlapping(splitLocation, splitHorizonal))
                 {
@@ -127,9 +163,10 @@ public class BSPTree : GenerationAlgorithm
                         Debug.Log("Force2:");
                         return;
                     }
-                    splitLocation = (int)Random.Range(startContext.y + min_room_height, endContext.y - min_room_height + spaceBetween);
+                    splitLocation = (int)UnityEngine.Random.Range(startContext.y + min_room_height, endContext.y - min_room_height + spaceBetween);
                     door = new Vector2Int(UnityEngine.Random.Range(startContext.x, endContext.x), splitLocation);
                 }
+                debugList[door.x, door.y] = TYPE_CELL.PUERTA;
 
                 if (this.listDoors.Count == 0)
                 { // First division
@@ -168,7 +205,7 @@ public class BSPTree : GenerationAlgorithm
             }
             else
             {
-                splitLocation = (int)Random.Range(startContext.x + min_room_width, endContext.x - min_room_width + spaceBetween);
+                splitLocation = (int)UnityEngine.Random.Range(startContext.x + min_room_width, endContext.x - min_room_width + spaceBetween);
                 Vector2Int door = new Vector2Int(splitLocation, UnityEngine.Random.Range(startContext.y, endContext.y));
 
                 while (DoorOverlapping(splitLocation, splitHorizonal))
@@ -179,9 +216,12 @@ public class BSPTree : GenerationAlgorithm
                         Debug.Log("Force2:");
                         return;
                     }
-                    splitLocation = (int)Random.Range(startContext.x + min_room_width, endContext.x - min_room_width + spaceBetween);
-                    door = new Vector2Int(splitLocation, UnityEngine.Random.Range(startContext.y, endContext.y));
+                    splitLocation = (int)UnityEngine.Random.Range(startContext.x + min_room_width, endContext.x - min_room_width + spaceBetween);
+                    door = new Vector2Int(splitLocation, UnityEngine.Random.Range(startContext.x, endContext.x));
                 }
+                debugList[door.x, door.y] = TYPE_CELL.PUERTA;
+
+
 
                 if (this.listDoors.Count == 0)
                 { // First division
@@ -215,6 +255,8 @@ public class BSPTree : GenerationAlgorithm
                     leftNode = new RoomNode(startContext, new Vector2Int(splitLocation - spaceBetween, endContext.y), LeftList); // Left
                     rightNode = new RoomNode(new Vector2Int(splitLocation + spaceBetween, startContext.y), endContext, RightList); // Right
                 }
+
+
             }
         }
 
@@ -243,7 +285,7 @@ public class BSPTree : GenerationAlgorithm
                 {
                     for (int index = door.y; index > room.getStartHousePosition().y; index--)
                     {
-                        map[door.x, index] = CELL_TYPE.FLOOR;
+                        map[door.x, index] = true;
                     }
                 }
                 else
@@ -251,7 +293,7 @@ public class BSPTree : GenerationAlgorithm
                     // The door is right down from the room
                     for (int index = door.y; index < room.getStartHousePosition().y; index++)
                     {
-                        map[door.x, index] = CELL_TYPE.FLOOR;
+                        map[door.x, index] = true;
                     }
                 }
                 return;
@@ -265,7 +307,7 @@ public class BSPTree : GenerationAlgorithm
                     // The door is right up from the room
                     for (int index = door.x; index > room.getStartHousePosition().x; index--)
                     {
-                        map[index, door.y] = CELL_TYPE.FLOOR;
+                        map[index, door.y] = true;
                     }
                 }
                 else
@@ -273,7 +315,7 @@ public class BSPTree : GenerationAlgorithm
 
                     for (int index = door.x; index < room.getStartHousePosition().x; index++)
                     {
-                        map[index, door.y] = CELL_TYPE.FLOOR;
+                        map[index, door.y] = true;
                     }
                 }
                 return;
@@ -282,7 +324,7 @@ public class BSPTree : GenerationAlgorithm
             // Room is not align with door
             for (int i = Mathf.Min(room.getHouseCenter().x, door.x); i <= Mathf.Max(room.getHouseCenter().x, door.x); i++)
             {
-                map[i, Mathf.Min(room.getHouseCenter().y, door.y)] = CELL_TYPE.FLOOR;
+                map[i, Mathf.Min(room.getHouseCenter().y, door.y)] = true;
             }
 
 
@@ -291,14 +333,14 @@ public class BSPTree : GenerationAlgorithm
             {
                 for (int i = Mathf.Min(room.getHouseCenter().y, door.y); i <= Mathf.Max(room.getHouseCenter().y, door.y); i++)
                 {
-                    map[Mathf.Max(room.getHouseCenter().x, door.x), i] = CELL_TYPE.FLOOR;
+                    map[Mathf.Max(room.getHouseCenter().x, door.x), i] = true;
                 }
             }
             else
             {
                 for (int i = Mathf.Min(room.getHouseCenter().y, door.y); i <= Mathf.Max(room.getHouseCenter().y, door.y); i++)
                 {
-                    map[Mathf.Min(room.getHouseCenter().x, door.x), i] = CELL_TYPE.FLOOR;
+                    map[Mathf.Min(room.getHouseCenter().x, door.x), i] = true;
                 }
             }
 
@@ -337,37 +379,40 @@ public class BSPTree : GenerationAlgorithm
 
     private void OnDrawGizmosSelected()
     {
-        if (this.map != null && this.gameObject.GetComponent<BSPTree>().isActiveAndEnabled)
+        if (this.map != null && this.gameObject.GetComponent<OldBSP>().isActiveAndEnabled)
         {
-            for (int i = 0; i < widthMap; i++)
-                for (int j = 0; j < heightMap; j++)
+            for (int i = 0; i < heightMap; i++)
+                for (int j = 0; j < widthMap; j++)
                 {
                     try
                     {
 
-                        switch (map[i, j])
+                        if (this.map[j, i])
                         {
-                            case CELL_TYPE.WALL:
-                                Gizmos.color = Color.black;
-                                break;
-                            case CELL_TYPE.FLOOR:
-                                Gizmos.color = Color.white;
-                                break;
-                            case CELL_TYPE.CORRIDOR:
-                                Gizmos.color = Color.grey;
-                                break;
-                            case CELL_TYPE.NOTHING:
-                                Gizmos.color = Color.black;
-                                break;
+                            Gizmos.color = Color.black;
+                            switch (debugmap[j, i])
+                            {
+                                case RoomNode.TYPE_CELL.PASILLO:
+                                    Gizmos.color = Color.blue;
+                                    break;
+                                case RoomNode.TYPE_CELL.PUERTA:
+                                    Gizmos.color = Color.black;
+                                    break;
+                                default:
+                                    Gizmos.color = Color.black;
+                                    break;
+                            }
                         }
+                        else
+                            Gizmos.color = Color.white;
 
 
-                        Gizmos.DrawCube(new Vector3(tileSize * i + 0.5f, tileSize * j + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
+                        Gizmos.DrawCube(new Vector3(tileSize * j + 0.5f, tileSize * i + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
                     }
                     catch
                     {
                         Gizmos.color = Color.gray;
-                        Gizmos.DrawCube(new Vector3(tileSize * i + 0.5f, tileSize * j + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
+                        Gizmos.DrawCube(new Vector3(tileSize * j + 0.5f, tileSize * i + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
                     }
                 }
         }
@@ -377,14 +422,14 @@ public class BSPTree : GenerationAlgorithm
 
 # region GizmoEditor
 #if UNITY_EDITOR
-[CustomEditor(typeof(BSPTree))]
-public class ScriptEditorBSP : Editor
+[CustomEditor(typeof(OldBSP))]
+public class ScriptEditorOldBSP : Editor
 {
-    private BSPTree gizmoDrawing;
+    private OldBSP gizmoDrawing;
 
     public override void OnInspectorGUI()
     {
-        gizmoDrawing = (BSPTree)target;
+        gizmoDrawing = (OldBSP)target;
         gizmoDrawing.widthMap = EditorGUILayout.IntSlider("Width", gizmoDrawing.widthMap, 0, 300);
         gizmoDrawing.heightMap = EditorGUILayout.IntSlider("Height", gizmoDrawing.heightMap, 0, 300);
         gizmoDrawing.tileSize = EditorGUILayout.IntSlider("Tile Size", gizmoDrawing.tileSize, 1, 100);

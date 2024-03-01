@@ -5,27 +5,19 @@ using UnityEngine;
 
 public class RandomWalk : GenerationAlgorithm
 {
-    #region Gizmo Settings
-    [Header("DRAWING OPTIONS")]
-    public int widthMap;   // Number of columns in the map
-    public int heightMap;  // Number of rows in the map
-    public int tileSize;    // Size of each tile on the canvas
-    public long executionTime;
-    public int threshold;
-    #endregion   
-    private bool[,] map;
+    public int threshold; // Percentage of the cellMap that must be painted
 
     private int paintedMap;
 
     public void Generate(int seed = -1)
     {
         paintedMap = 0;
-        map = new bool[widthMap, heightMap];
+        map = new CELL_TYPE[widthMap, heightMap];
         this.seed = seed;
         GenerateSeed(seed);
         int randomX = UnityEngine.Random.Range(0, widthMap);
         int randomY = UnityEngine.Random.Range(0, heightMap);
-        map[randomX, randomY] = true;
+        map[randomX, randomY] = CELL_TYPE.FLOOR;
         paintedMap++;
         while ((float)(paintedMap / (float)(widthMap * heightMap)) < (float)(threshold / 100f))
         {
@@ -37,11 +29,6 @@ public class RandomWalk : GenerationAlgorithm
                     if (randomX > 0)
                     {
                         randomX = randomX - 1;
-                        if (!map[randomX, randomY]) // Cell is not visited   
-                        {
-                            map[randomX, randomY] = true;
-                            paintedMap++;
-                        }
                     }
                     break;
 
@@ -49,11 +36,6 @@ public class RandomWalk : GenerationAlgorithm
                     if (randomY + 1 < heightMap)
                     {
                         randomY = randomY + 1;
-                        if (!map[randomX, randomY]) // Cell is not visited   
-                        {
-                            map[randomX, randomY] = true;
-                            paintedMap++;
-                        }
                     }
                     break;
 
@@ -61,11 +43,6 @@ public class RandomWalk : GenerationAlgorithm
                     if (randomX + 1 < widthMap)
                     {
                         randomX = randomX + 1;
-                        if (!map[randomX, randomY]) // Cell is not visited   
-                        {
-                            map[randomX, randomY] = true;
-                            paintedMap++;
-                        }
                     }
                     break;
 
@@ -73,13 +50,14 @@ public class RandomWalk : GenerationAlgorithm
                     if (randomY > 0 )
                     {
                         randomY = randomY - 1;
-                        if (!map[randomX, randomY]) // Cell is not visited   
-                        {
-                            map[randomX, randomY] = true;
-                            paintedMap++;
-                        }
                     }
                     break;
+            }
+
+            if (map[randomX, randomY] == CELL_TYPE.NOTHING) // Cell is not visited   
+            {
+                map[randomX, randomY] = CELL_TYPE.FLOOR;
+                paintedMap++;
             }
         }
     }
@@ -95,10 +73,21 @@ public class RandomWalk : GenerationAlgorithm
                 {
                     try
                     {
-                        if (!map[j, i])
-                            Gizmos.color = Color.black;
-                        else
-                            Gizmos.color = Color.white;
+                        switch (map[i, j])
+                        {
+                            case CELL_TYPE.WALL:
+                                Gizmos.color = Color.black;
+                                break;
+                            case CELL_TYPE.FLOOR:
+                                Gizmos.color = Color.white;
+                                break;
+                            case CELL_TYPE.CORRIDOR:
+                                Gizmos.color = Color.grey;
+                                break;
+                            case CELL_TYPE.NOTHING:
+                                Gizmos.color = Color.red;
+                                break;
+                        }
                         Gizmos.DrawCube(new Vector3(tileSize * j + 0.5f, tileSize * i + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
                     }
                     catch
@@ -128,7 +117,7 @@ public class ScriptEditorRW : Editor
         //DrawDefaultInspector(); // Draw all public variables
         EditorGUILayout.Space();
 
-        gizmoDrawing.threshold = EditorGUILayout.IntSlider("% Fill of map", gizmoDrawing.threshold, 0, 100);
+        gizmoDrawing.threshold = EditorGUILayout.IntSlider("% Fill of cellMap", gizmoDrawing.threshold, 0, 100);
 
         if (GUILayout.Button("Generate cellular automata"))
         {

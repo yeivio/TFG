@@ -9,14 +9,7 @@ using UnityEngine;
 // 2 3 1528892033
 public class MazeAlgorithm : GenerationAlgorithm
 {
-    #region Gizmo Settings
-    [Header("DRAWING OPTIONS")]
-    public int widthMap;   // Number of columns in the map
-    public int heightMap;  // Number of rows in the map
-    public int tileSize;    // Size of each tile on the canvas
-    public long executionTime;
-    #endregion   
-    private Cell[,] map; // True is Used, False is not Used
+    private Cell[,] cellMap; // True is Used, False is not Used
     public List<Tiles> usableTiles;
 
     
@@ -36,12 +29,12 @@ public class MazeAlgorithm : GenerationAlgorithm
         this.seed = seed;
         GenerateSeed(seed);
 
-        map = new Cell[widthMap, heightMap];
+        cellMap = new Cell[widthMap, heightMap];
         for(int i = 0; i < widthMap; i++)
         {
             for (int j = 0; j < heightMap; j++)
             {
-                map[i, j] = new Cell();
+                cellMap[i, j] = new Cell();
             }
         }
         int startingX = UnityEngine.Random.Range(0, widthMap);
@@ -64,7 +57,7 @@ public class MazeAlgorithm : GenerationAlgorithm
             for (int i = 0; i < heightMap; i++)
                 for (int j = 0; j < widthMap; j++)
                 {
-                    if (map[j, i].isVisited)
+                    if (cellMap[j, i].isVisited)
                     {
                         SpawnTile(j,i);
                     }
@@ -79,7 +72,7 @@ public class MazeAlgorithm : GenerationAlgorithm
         // Filter Candidates
         foreach(Cell.ORIENTATION or in Enum.GetValues(typeof(Cell.ORIENTATION)))
         {
-            if(!map[x, y].GetConnections().Contains(or)) {
+            if(!cellMap[x, y].GetConnections().Contains(or)) {
                 // Add new tiles
                 foreach(Tiles tile in this.usableTiles)
                 {
@@ -110,7 +103,7 @@ public class MazeAlgorithm : GenerationAlgorithm
 
         foreach (Cell.ORIENTATION or in Enum.GetValues(typeof(Cell.ORIENTATION)))
         {
-            if (map[x, y].GetConnections().Contains(or))
+            if (cellMap[x, y].GetConnections().Contains(or))
             {
                 // Add new tiles
                 foreach (Tiles tile in this.usableTiles)
@@ -157,55 +150,55 @@ public class MazeAlgorithm : GenerationAlgorithm
         int xIndex = x;
         int yIndex = y;
 
-        this.map[xIndex, yIndex].isVisited = true;
+        this.cellMap[xIndex, yIndex].isVisited = true;
         while (canFindNeighbour(xIndex,yIndex))
         {
             int direction = UnityEngine.Random.Range(0, 4);
             switch(direction)
             {
                 case 0:
-                    if(xIndex+1 < widthMap && !map[xIndex+1,yIndex].isVisited) {
-                        this.map[xIndex, yIndex].setConnection(Cell.ORIENTATION.RIGHT);
+                    if(xIndex+1 < widthMap && !cellMap[xIndex+1,yIndex].isVisited) {
+                        this.cellMap[xIndex, yIndex].setConnection(Cell.ORIENTATION.RIGHT);
                         xIndex++;
-                        this.map[xIndex, yIndex].setConnection(Cell.ORIENTATION.LEFT);
+                        this.cellMap[xIndex, yIndex].setConnection(Cell.ORIENTATION.LEFT);
                     }
                     break;
                 case 1:
-                    if (yIndex+ 1 < heightMap && !map[xIndex, yIndex+1].isVisited)
+                    if (yIndex+ 1 < heightMap && !cellMap[xIndex, yIndex+1].isVisited)
                     {
-                        this.map[xIndex, yIndex].setConnection(Cell.ORIENTATION.UP);
+                        this.cellMap[xIndex, yIndex].setConnection(Cell.ORIENTATION.UP);
                         yIndex++;
-                        this.map[xIndex, yIndex].setConnection(Cell.ORIENTATION.DOWN);
+                        this.cellMap[xIndex, yIndex].setConnection(Cell.ORIENTATION.DOWN);
                     }
                     break;
                 case 2:
-                    if (xIndex-1 >= 0 && !map[xIndex-1, yIndex].isVisited)
+                    if (xIndex-1 >= 0 && !cellMap[xIndex-1, yIndex].isVisited)
                     {
-                        this.map[xIndex, yIndex].setConnection(Cell.ORIENTATION.LEFT);
+                        this.cellMap[xIndex, yIndex].setConnection(Cell.ORIENTATION.LEFT);
                         xIndex--;
-                        this.map[xIndex, yIndex].setConnection(Cell.ORIENTATION.RIGHT);
+                        this.cellMap[xIndex, yIndex].setConnection(Cell.ORIENTATION.RIGHT);
                     }
                         
                     break;
                 case 3:
-                    if (yIndex - 1 >= 0 && !map[xIndex, yIndex-1].isVisited)
+                    if (yIndex - 1 >= 0 && !cellMap[xIndex, yIndex-1].isVisited)
                     {
-                        this.map[xIndex, yIndex].setConnection(Cell.ORIENTATION.DOWN);
+                        this.cellMap[xIndex, yIndex].setConnection(Cell.ORIENTATION.DOWN);
                         yIndex--;
-                        this.map[xIndex, yIndex].setConnection(Cell.ORIENTATION.UP);
+                        this.cellMap[xIndex, yIndex].setConnection(Cell.ORIENTATION.UP);
                     }
                         
                     break;
             }
-            this.map[xIndex, yIndex].isVisited = true;
+            this.cellMap[xIndex, yIndex].isVisited = true;
         }
     }
     public bool canFindNeighbour(int x, int y)
     {
-        if ((x + 1 < this.widthMap && !map[x + 1, y].isVisited)
-            || (y + 1 < this.heightMap && !map[x, y + 1].isVisited)
-            || (x - 1 > 0 && !map[x - 1, y].isVisited)
-            || (y - 1 > 0 && !map[x, y - 1].isVisited))
+        if ((x + 1 < this.widthMap && !cellMap[x + 1, y].isVisited)
+            || (y + 1 < this.heightMap && !cellMap[x, y + 1].isVisited)
+            || (x - 1 > 0 && !cellMap[x - 1, y].isVisited)
+            || (y - 1 > 0 && !cellMap[x, y - 1].isVisited))
                 return true;
 
         return false;
@@ -213,31 +206,31 @@ public class MazeAlgorithm : GenerationAlgorithm
 
     public bool ConnectNeighbor(int x, int y)
     {
-        if (x+1 < this.widthMap && map[x + 1, y].isVisited)
+        if (x+1 < this.widthMap && cellMap[x + 1, y].isVisited)
         {
-            map[x, y].setConnection(Cell.ORIENTATION.RIGHT);
-            map[x + 1, y].setConnection(Cell.ORIENTATION.LEFT);
+            cellMap[x, y].setConnection(Cell.ORIENTATION.RIGHT);
+            cellMap[x + 1, y].setConnection(Cell.ORIENTATION.LEFT);
             return true;
         }
             
-        if (y+1 < this.heightMap&& map[x, y + 1].isVisited)
+        if (y+1 < this.heightMap&& cellMap[x, y + 1].isVisited)
         {
-            map[x, y + 1].setConnection(Cell.ORIENTATION.DOWN);
-            map[x,y].setConnection(Cell.ORIENTATION.UP);
+            cellMap[x, y + 1].setConnection(Cell.ORIENTATION.DOWN);
+            cellMap[x,y].setConnection(Cell.ORIENTATION.UP);
             return true;
         }
             
-        if (x-1 >= 0 && map[x - 1, y].isVisited)
+        if (x-1 >= 0 && cellMap[x - 1, y].isVisited)
         {
-            map[x, y].setConnection(Cell.ORIENTATION.LEFT);
-            map[x - 1, y].setConnection(Cell.ORIENTATION.RIGHT);
+            cellMap[x, y].setConnection(Cell.ORIENTATION.LEFT);
+            cellMap[x - 1, y].setConnection(Cell.ORIENTATION.RIGHT);
             return true;
         }
             
-        if (y - 1 >= 0 && map[x, y - 1].isVisited)
+        if (y - 1 >= 0 && cellMap[x, y - 1].isVisited)
         {
-            map[x, y - 1].setConnection(Cell.ORIENTATION.UP);
-            map[x, y].setConnection(Cell.ORIENTATION.DOWN);
+            cellMap[x, y - 1].setConnection(Cell.ORIENTATION.UP);
+            cellMap[x, y].setConnection(Cell.ORIENTATION.DOWN);
             return true;
         }
 
@@ -249,8 +242,8 @@ public class MazeAlgorithm : GenerationAlgorithm
         for (int i = 0; i < heightMap; i++)
             for (int j = 0; j < widthMap; j++)
             {
-                if (!map[j, i].isVisited && ConnectNeighbor(j, i)) {
-                    map[j, i].isVisited = true;
+                if (!cellMap[j, i].isVisited && ConnectNeighbor(j, i)) {
+                    cellMap[j, i].isVisited = true;
                     return new Vector2Int(j,i);
                 }
             }
@@ -263,7 +256,7 @@ public class MazeAlgorithm : GenerationAlgorithm
         for (int i = 0; i < heightMap; i++)
             for (int j = 0; j < widthMap; j++)
             {
-                if (!map[j,i].isVisited)
+                if (!cellMap[j,i].isVisited)
                     return false;
             }
 
@@ -296,19 +289,19 @@ public class MazeAlgorithm : GenerationAlgorithm
 
     private void OnDrawGizmosSelected()
     {
-        if (this.map != null && !Application.isPlaying)
+        if (this.cellMap != null && !Application.isPlaying)
         {
             for (int i = 0; i < heightMap; i++)
                 for (int j = 0; j < widthMap; j++)
                 {
                     try
                     {
-                        if (map[j, i].isVisited)
+                        if (cellMap[j, i].isVisited)
                             Gizmos.color = Color.black;
                         else
                             Gizmos.color = Color.white;
                         Gizmos.DrawCube(new Vector3(tileSize * j + 0.5f, tileSize * i + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
-                        DrawBorder(map[j,i],j ,i);
+                        DrawBorder(cellMap[j,i],j ,i);
                         
                     }
                     catch

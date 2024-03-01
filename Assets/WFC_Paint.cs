@@ -2,14 +2,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using UnityEditor;
+using NUnit.Framework.Constraints;
+using static Unity.Burst.Intrinsics.X86;
 
-public class WaveFunctionCollapse : GenerationAlgorithm
+public class WFC_Paint : GenerationAlgorithm
 {
+    public GenerationAlgorithm baseMap;
+
     public List<Tiles> usableTiles;
     public Tiles DefaultTile;
     private Cell[,] cellMap;   // Map
-    private int startingX,startingY;
-
 
     public void Generate(int seed = -1)
     {
@@ -31,7 +33,7 @@ public class WaveFunctionCollapse : GenerationAlgorithm
             List<Cell> sortedTiles = SortedTiles(); // Find the tiles with the lowest entropy
             randomCell = UnityEngine.Random.Range(0, sortedTiles.Count); // Pick a random cell
             Cell actualCell = sortedTiles[randomCell];
-            if(actualCell.options.Count == 0 ) // Doesn't have any tile options
+            if (actualCell.options.Count == 0) // Doesn't have any tile options
             {
                 actualCell.collapsed = true;
                 actualCell.options = new List<Tiles>() { DefaultTile };
@@ -40,11 +42,11 @@ public class WaveFunctionCollapse : GenerationAlgorithm
             {
                 //Collapse
                 actualCell.collapsed = true;
-                Tiles seletedTile = actualCell.options[UnityEngine.Random.Range(0, actualCell.options.Count)];
+                Tiles seletedTile = FilterCellOptions(actualCell);
                 actualCell.options = new List<Tiles>() { seletedTile };
             }
 
-            
+
 
 
             UpdateMap(actualCell);
@@ -58,6 +60,21 @@ public class WaveFunctionCollapse : GenerationAlgorithm
                     SpawnTile(j, i);
                 }
         }
+    }
+
+    private Tiles FilterCellOptions(Cell actualCell)
+    {
+        //actualCell.options[UnityEngine.Random.Range(0, actualCell.options.Count)]
+        switch (baseMap.map[actualCell.xPos, actualCell.yPos])
+        {
+            case CELL_TYPE.FLOOR:
+                actualCell.options.RemoveAll(x => x.isWall);
+                break;
+            case CELL_TYPE.WALL:
+                actualCell.options.RemoveAll(x => x.isFloor);
+                break;
+        }
+        throw new NotImplementedException();
     }
 
     public void SpawnTile(int x, int y)
@@ -80,10 +97,11 @@ public class WaveFunctionCollapse : GenerationAlgorithm
         bool notCollapsed = false;
         for (int i = 0; i < widthMap; i++)
         {
-            for(int j = 0; j < heightMap; j++)
+            for (int j = 0; j < heightMap; j++)
             {
-                if (!cellMap[i, j].collapsed) { 
-                notCollapsed = true;
+                if (!cellMap[i, j].collapsed)
+                {
+                    notCollapsed = true;
                     break;
                 }
             }
@@ -100,7 +118,7 @@ public class WaveFunctionCollapse : GenerationAlgorithm
             {
                 if (!cellMap[i, j].collapsed)
                 {
-                    aux.Add(cellMap[i,j]);
+                    aux.Add(cellMap[i, j]);
                 }
             }
         }
@@ -112,16 +130,17 @@ public class WaveFunctionCollapse : GenerationAlgorithm
     private void CleanMap()
     {
         cellMap = new Cell[widthMap, heightMap];
-        for(int i = 0; i < widthMap; i++) {
+        for (int i = 0; i < widthMap; i++)
+        {
             for (int j = 0; j < heightMap; j++)
             {
-                cellMap[i,j] = new Cell(usableTiles, i, j);
+                cellMap[i, j] = new Cell(usableTiles, i, j);
             }
         }
     }
     public void CheckValidity(List<Tiles> optionList, List<Tiles> validOption)
     {
-        for( int i = optionList.Count - 1; i >= 0 ; i--)
+        for (int i = optionList.Count - 1; i >= 0; i--)
         {
             Tiles aux = optionList[i];
             if (!validOption.Contains(aux))
@@ -133,15 +152,15 @@ public class WaveFunctionCollapse : GenerationAlgorithm
     public void UpdateMap(Cell cell)
     {
         // Update bottom cell
-        if( cell.yPos > 0 && !cellMap[cell.xPos, cell.yPos -1 ].collapsed)
+        if (cell.yPos > 0 && !cellMap[cell.xPos, cell.yPos - 1].collapsed)
         {
             bool valid;
-            foreach(Tiles tilOption in new List<Tiles>(cellMap[cell.xPos, cell.yPos - 1].options))
+            foreach (Tiles tilOption in new List<Tiles>(cellMap[cell.xPos, cell.yPos - 1].options))
             {
                 valid = false;
-                foreach(Tiles tile in tilOption.TopPosibilities)
+                foreach (Tiles tile in tilOption.TopPosibilities)
                 {
-                    if(cell.options[0].GetComponent<SpriteRenderer>().sprite == tile.GetComponent<SpriteRenderer>().sprite)
+                    if (cell.options[0].GetComponent<SpriteRenderer>().sprite == tile.GetComponent<SpriteRenderer>().sprite)
                     {
                         valid = true;
                     }
@@ -153,10 +172,10 @@ public class WaveFunctionCollapse : GenerationAlgorithm
 
 
         // Update LeftCell
-        if (cell.xPos > 0 && !cellMap[cell.xPos-1, cell.yPos].collapsed)
+        if (cell.xPos > 0 && !cellMap[cell.xPos - 1, cell.yPos].collapsed)
         {
             bool valid;
-            foreach (Tiles tilOption in new List<Tiles>(cellMap[cell.xPos-1, cell.yPos].options))
+            foreach (Tiles tilOption in new List<Tiles>(cellMap[cell.xPos - 1, cell.yPos].options))
             {
                 valid = false;
                 foreach (Tiles tile in tilOption.RightPosibilities)
@@ -167,7 +186,7 @@ public class WaveFunctionCollapse : GenerationAlgorithm
                     }
                 }
                 if (!valid)
-                    cellMap[cell.xPos-1, cell.yPos].options.Remove(tilOption);
+                    cellMap[cell.xPos - 1, cell.yPos].options.Remove(tilOption);
             }
         }
 
@@ -194,7 +213,7 @@ public class WaveFunctionCollapse : GenerationAlgorithm
 
 
         // Update RightCell
-        if (cell.xPos < widthMap - 1  && !cellMap[cell.xPos + 1, cell.yPos].collapsed)
+        if (cell.xPos < widthMap - 1 && !cellMap[cell.xPos + 1, cell.yPos].collapsed)
         {
             bool valid;
             foreach (Tiles tilOption in new List<Tiles>(cellMap[cell.xPos + 1, cell.yPos].options))
@@ -229,23 +248,16 @@ public class WaveFunctionCollapse : GenerationAlgorithm
     }
 }
 
-
-
-
-
-
-
-
 # region GizmoEditor
 #if UNITY_EDITOR
-[CustomEditor(typeof(WaveFunctionCollapse))]
-public class ScriptEditorWFC : Editor
+[CustomEditor(typeof(WFC_Paint))]
+public class ScriptEditorWFC_Paint : Editor
 {
-    private WaveFunctionCollapse gizmoDrawing;
+    private WFC_Paint gizmoDrawing;
 
     public override void OnInspectorGUI()
     {
-        gizmoDrawing = (WaveFunctionCollapse)target;
+        gizmoDrawing = (WFC_Paint)target;
         gizmoDrawing.widthMap = EditorGUILayout.IntSlider("Width", gizmoDrawing.widthMap, 0, 300);
         gizmoDrawing.heightMap = EditorGUILayout.IntSlider("Height", gizmoDrawing.heightMap, 0, 300);
         gizmoDrawing.tileSize = EditorGUILayout.IntSlider("Tile Size", gizmoDrawing.tileSize, 1, 100);
@@ -256,7 +268,7 @@ public class ScriptEditorWFC : Editor
         gizmoDrawing.seed = EditorGUILayout.IntField("Seed", gizmoDrawing.seed);
         EditorGUILayout.PropertyField(serializedObject.FindProperty("usableTiles"), new GUIContent("Sprite"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("DefaultTile"), new GUIContent("Sprite Default"));
-     
+
         if (GUILayout.Button("Generate cellular automata"))
         {
             gizmoDrawing.Generate(gizmoDrawing.seed);
@@ -274,3 +286,4 @@ public class ScriptEditorWFC : Editor
 }
 #endif
 #endregion
+
