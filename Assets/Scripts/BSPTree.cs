@@ -180,6 +180,7 @@ public class BSPTree : GenerationAlgorithm
                         return;
                     }
                     splitLocation = (int)Random.Range(startContext.x + min_room_width, endContext.x - min_room_width + spaceBetween);
+                    // Maybe here is startcontext.X instead of Y
                     door = new Vector2Int(splitLocation, UnityEngine.Random.Range(startContext.y, endContext.y));
                 }
 
