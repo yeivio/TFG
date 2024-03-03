@@ -7,12 +7,13 @@ public class Tiles : MonoBehaviour
     public Tiles[] RightPosibilities;
     public Tiles[] LeftPosibilities;
     public Tiles[] BottomPosibilities;
+
     [Header("Maze")]
     public bool isLeftConnected;
     public bool isRightConnected;
     public bool isBottomConnected;
     public bool isTopConnected;
+
     [Header("WSP-Paint")]
-    public bool isWall;
-    public bool isFloor;
+    public GenerationAlgorithm.CELL_TYPE cellType;
 }

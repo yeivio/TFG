@@ -2,19 +2,30 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using UnityEditor;
-using NUnit.Framework.Constraints;
-using static Unity.Burst.Intrinsics.X86;
+using System.Linq;
 
-public class WFC_Paint : GenerationAlgorithm
+public class WFC_Paint : MonoBehaviour
 {
-    public GenerationAlgorithm baseMap;
 
+    // 10 10 0.8 0 2 2 619078697
+
+
+
+    public GenerationAlgorithm baseMap;
+    private int widthMap;
+    private int heightMap;
     public List<Tiles> usableTiles;
     public Tiles DefaultTile;
     private Cell[,] cellMap;   // Map
 
-    public void Generate(int seed = -1)
+    public int seed;
+
+    public void Generate()
     {
+        this.widthMap = baseMap.widthMap;
+        this.heightMap = baseMap.heightMap;
+
+        //GenerateSeed(-953493837);
 
         // Clean prev output
         int childCount = transform.childCount;
@@ -22,9 +33,10 @@ public class WFC_Paint : GenerationAlgorithm
         {
             Destroy(this.transform.GetChild(i).gameObject);
         }
+        //((CellularAutomata)baseMap).Generate(-1950587812);
+        //((CellularAutomata)baseMap).Generate(-434656559); FINISH
+        ((CellularAutomata)baseMap).Generate(((CellularAutomata)baseMap).seed);
 
-        this.seed = seed;
-        GenerateSeed(seed);
 
         CleanMap();
         int randomCell;
@@ -52,14 +64,11 @@ public class WFC_Paint : GenerationAlgorithm
             UpdateMap(actualCell);
         }
 
-        if (Application.isPlaying)
-        {
-            for (int i = 0; i < heightMap; i++)
-                for (int j = 0; j < widthMap; j++)
-                {
-                    SpawnTile(j, i);
-                }
-        }
+        for (int i = 0; i < heightMap; i++)
+            for (int j = 0; j < widthMap; j++)
+            {
+                SpawnTile(j, i);
+            }
     }
 
     private Tiles FilterCellOptions(Cell actualCell)
@@ -67,14 +76,99 @@ public class WFC_Paint : GenerationAlgorithm
         //actualCell.options[UnityEngine.Random.Range(0, actualCell.options.Count)]
         switch (baseMap.map[actualCell.xPos, actualCell.yPos])
         {
-            case CELL_TYPE.FLOOR:
-                actualCell.options.RemoveAll(x => x.isWall);
+            case GenerationAlgorithm.CELL_TYPE.FLOOR:
+                actualCell.options.RemoveAll(x => x.cellType != GenerationAlgorithm.CELL_TYPE.FLOOR);
                 break;
-            case CELL_TYPE.WALL:
-                actualCell.options.RemoveAll(x => x.isFloor);
+            case GenerationAlgorithm.CELL_TYPE.WALL:
+                actualCell.options.RemoveAll(x => x.cellType != GenerationAlgorithm.CELL_TYPE.WALL);
                 break;
         }
-        throw new NotImplementedException();
+
+        // Check top
+        if (actualCell.yPos < heightMap - 1)
+        {
+           // We get only the tiles which have a wall connection on top
+            actualCell.options.RemoveAll(x => !x.TopPosibilities.Any(y => y.cellType == baseMap.map[actualCell.xPos, actualCell.yPos + 1]));
+        }
+
+        // Check bottom
+        if (actualCell.yPos > 0 )
+        {
+            actualCell.options.RemoveAll(x => !x.BottomPosibilities.Any(y => y.cellType == baseMap.map[actualCell.xPos, actualCell.yPos - 1]));
+        }
+
+        // Check left
+        if (actualCell.xPos > 0 )
+        {
+            actualCell.options.RemoveAll(x => !x.LeftPosibilities.Any(y => y.cellType == baseMap.map[actualCell.xPos - 1, actualCell.yPos]));
+        }
+
+        // Check right
+        if (actualCell.xPos < widthMap - 1)
+        {
+            actualCell.options.RemoveAll(x => !x.RightPosibilities.Any(y => y.cellType == baseMap.map[actualCell.xPos + 1, actualCell.yPos]));
+        }
+        
+
+        if(actualCell.options.Count > 1 ) {
+            // Now we select the tile with most % of being correct. That is the 
+            // the one which have more valid sides
+            Tiles finalTile = null;
+            float Maxprob = float.MinValue;
+            float tileProb;
+            foreach (Tiles tile in new List<Tiles>(actualCell.options))
+            {
+                tileProb = 0;
+                if (actualCell.xPos + 1 >= widthMap && tile.RightPosibilities.Any(x => x.cellType != GenerationAlgorithm.CELL_TYPE.WALL)
+                    ||
+                    actualCell.xPos < widthMap - 1 && tile.RightPosibilities.Any(x => x.cellType != baseMap.map[actualCell.xPos + 1, actualCell.yPos]))
+                {
+                    tileProb--;
+                }
+
+                if (actualCell.yPos + 1 >= heightMap && tile.TopPosibilities.Any(x => x.cellType != GenerationAlgorithm.CELL_TYPE.WALL)
+                    ||
+                    actualCell.yPos < heightMap - 1 && tile.TopPosibilities.Any(x => x.cellType != baseMap.map[actualCell.xPos, actualCell.yPos + 1]))
+                {
+                    tileProb--;
+                }
+
+                if (actualCell.xPos - 1 < 0 && tile.LeftPosibilities.Any(x => x.cellType != GenerationAlgorithm.CELL_TYPE.WALL)
+                    ||
+                    actualCell.xPos > 0 && tile.LeftPosibilities.Any(x => x.cellType != baseMap.map[actualCell.xPos - 1, actualCell.yPos]))
+                {
+                    tileProb--;
+                }
+
+                if (actualCell.yPos - 1 < 0 && tile.BottomPosibilities.Any(x => x.cellType != GenerationAlgorithm.CELL_TYPE.WALL)
+                    ||
+                    actualCell.yPos > 0 && tile.BottomPosibilities.Any(x => x.cellType != baseMap.map[actualCell.xPos, actualCell.yPos - 1]))
+                {
+                    tileProb--;
+                }
+                if (tileProb > Maxprob)
+                {
+                    if (finalTile)
+                        actualCell.options.Remove(finalTile);
+                    finalTile = tile;
+                    Maxprob = tileProb;
+                    
+                }
+                else
+                {
+                    actualCell.options.Remove(tile);
+                }
+            }
+        }
+
+
+        try {
+             return actualCell.options[UnityEngine.Random.Range(0, actualCell.options.Count)];
+        }catch(Exception e)
+        {
+            Debug.Log($"{actualCell.xPos}, {actualCell.yPos}:{e}");
+            return DefaultTile;
+        }
     }
 
     public void SpawnTile(int x, int y)
@@ -86,10 +180,10 @@ public class WFC_Paint : GenerationAlgorithm
         }
         catch (Exception ex)
         {
-            Debug.Log("Seed:" + seed);
+            Debug.Log("Error");
         }
         aux.transform.parent = this.transform;
-        aux.gameObject.transform.position = new Vector3(x, y, 0);
+        aux.gameObject.transform.position = new Vector3(x+0.5f, y+0.5f, 0);
     }
 
     public bool CheckEnd()
@@ -134,7 +228,7 @@ public class WFC_Paint : GenerationAlgorithm
         {
             for (int j = 0; j < heightMap; j++)
             {
-                cellMap[i, j] = new Cell(usableTiles, i, j);
+                cellMap[i, j] = new Cell(usableTiles, i, j, baseMap.map[i,j]);
             }
         }
     }
@@ -236,15 +330,26 @@ public class WFC_Paint : GenerationAlgorithm
         public bool collapsed;
         public List<Tiles> options; // Tiles this cell can be collapsed into
         public int xPos, yPos;
-
-        public Cell() { collapsed = false; this.options = new List<Tiles>(); }
-        public Cell(List<Tiles> tiles, int xPos, int yPos)
+        public Cell(List<Tiles> tiles, int xPos, int yPos, GenerationAlgorithm.CELL_TYPE type)
         {
             this.collapsed = false;
             this.options = new List<Tiles>(tiles);
+            this.options.RemoveAll(x => x.cellType != type);
             this.xPos = xPos;
             this.yPos = yPos;
         }
+    }
+    protected void GenerateSeed(int seed = -1)
+    {
+        int tempSeed = (int)DateTime.Now.Ticks;
+        if (seed == -1) // No seed 
+        {
+            Debug.Log("No hay seed");
+            UnityEngine.Random.InitState(tempSeed);
+            this.seed = tempSeed;
+        }
+        else
+            UnityEngine.Random.InitState(seed);
     }
 }
 
@@ -258,26 +363,17 @@ public class ScriptEditorWFC_Paint : Editor
     public override void OnInspectorGUI()
     {
         gizmoDrawing = (WFC_Paint)target;
-        gizmoDrawing.widthMap = EditorGUILayout.IntSlider("Width", gizmoDrawing.widthMap, 0, 300);
-        gizmoDrawing.heightMap = EditorGUILayout.IntSlider("Height", gizmoDrawing.heightMap, 0, 300);
-        gizmoDrawing.tileSize = EditorGUILayout.IntSlider("Tile Size", gizmoDrawing.tileSize, 1, 100);
-        EditorGUILayout.FloatField("Execution time (ms)", gizmoDrawing.executionTime);
         //DrawDefaultInspector(); // Draw all public variables
         EditorGUILayout.Space();
 
-        gizmoDrawing.seed = EditorGUILayout.IntField("Seed", gizmoDrawing.seed);
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("baseMap"), new GUIContent("BaseMap"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("usableTiles"), new GUIContent("Sprite"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("DefaultTile"), new GUIContent("Sprite Default"));
 
-        if (GUILayout.Button("Generate cellular automata"))
-        {
-            gizmoDrawing.Generate(gizmoDrawing.seed);
-
-        }
-
-        if (GUILayout.Button("Generate random cellular automata"))
+        if (GUILayout.Button("Paint"))
         {
             gizmoDrawing.Generate();
+
         }
         serializedObject.ApplyModifiedProperties();
         if (GUI.changed)

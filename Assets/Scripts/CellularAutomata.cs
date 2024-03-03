@@ -8,6 +8,7 @@ public class CellularAutomata : GenerationAlgorithm
 {
 
     //True = pared
+    //10 10 0.554 0 2 2 1628097943
 
     #region CELLULAR SETTINGS
     public float chanceToStartAsWall; // Chance to start as a Wall
@@ -370,9 +371,16 @@ public class CellularAutomata : GenerationAlgorithm
                         int drawX = coords.X + x;
                         int drawY = coords.Y + y;
 
-                        if (drawX >= 0 && drawX < widthMap && drawY >= 0 && drawY <= heightMap)
+                        if (drawX >= 0 && drawX < widthMap && drawY >= 0 && drawY < heightMap)
                         {
-                            map[drawX, drawY] = CELL_TYPE.FLOOR;
+                            try
+                            {
+                                map[drawX, drawY] = CELL_TYPE.FLOOR;
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.LogError(e + ":" + seed);
+                            }
                         }
                     }
                 }
@@ -500,8 +508,7 @@ public class CellularAutomata : GenerationAlgorithm
 
     private void OnDrawGizmosSelected()
     {
-        if (Application.isPlaying)
-            return;
+
         if (this.map != null)
         {
             for (int i = 0; i < widthMap; i++)
