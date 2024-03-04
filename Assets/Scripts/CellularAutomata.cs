@@ -22,7 +22,7 @@ public class CellularAutomata : GenerationAlgorithm
     private List<List<Coords>> wallRegions;
     private List<List<Coords>> roomRegions;
 
-    public virtual bool[,] Generate(int seed = -1)
+    public override void Generate(int seed = -1)
     {
 
         map = new CELL_TYPE[widthMap, heightMap];
@@ -44,7 +44,6 @@ public class CellularAutomata : GenerationAlgorithm
         executionTime = watch.ElapsedMilliseconds;
         if (GetAllRegionsOfType(CELL_TYPE.FLOOR).Count > 1)
             Debug.LogError("CellularAutomata:" + this.seed);
-        return new bool[widthMap, heightMap];
     }
 
 

@@ -10,7 +10,7 @@ public class BSPTree : GenerationAlgorithm
     public int min_room_height;
     public int max_room_height;
 
-    public void Generate(int seed = -1)
+    public override void Generate(int seed = -1)
     {
         this.seed = seed;
         GenerateSeed(seed);

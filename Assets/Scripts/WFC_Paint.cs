@@ -35,10 +35,8 @@ public class WFC_Paint : MonoBehaviour
         {
             Destroy(this.transform.GetChild(i).gameObject);
         }
-        //((CellularAutomata)baseMap).Generate(-1950587812);
-        //((CellularAutomata)baseMap).Generate(-434656559); FINISH
-        ((CellularAutomata)baseMap).Generate(((CellularAutomata)baseMap).seed);
 
+        baseMap.Generate(seed);
 
         CleanMap();
         int randomCell;
@@ -54,7 +52,10 @@ public class WFC_Paint : MonoBehaviour
             }
             else
             {
+                float a;
                 //Collapse
+                if (baseMap.map[actualCell.xPos, actualCell.yPos] == GenerationAlgorithm.CELL_TYPE.WALL)
+                    a = 0;
                 actualCell.collapsed = true;
                 Tiles seletedTile = FilterCellOptions(actualCell);
                 actualCell.options = new List<Tiles>() { seletedTile };
@@ -165,21 +166,10 @@ public class WFC_Paint : MonoBehaviour
                 }
             }
 
-            //if(finalTiles.Count > 1 && finalTiles.Any(x => x.GetComponent<SpriteRenderer>().sprite == DefaultTile.GetComponent<SpriteRenderer>().sprite))
-            //{
-            //    if((actualCell.xPos > 0  && actualCell.yPos > 0 && baseMap.map[actualCell.xPos - 1, actualCell.yPos - 1] == GenerationAlgorithm.CELL_TYPE.FLOOR)
-            //        || (actualCell.xPos > 0 && actualCell.yPos < heightMap - 1 && baseMap.map[actualCell.xPos - 1, actualCell.yPos + 1] == GenerationAlgorithm.CELL_TYPE.FLOOR)
-            //         || (actualCell.xPos < widthMap - 1  && actualCell.yPos > 0 && baseMap.map[actualCell.xPos + 1, actualCell.yPos - 1] == GenerationAlgorithm.CELL_TYPE.FLOOR)
-            //         || (actualCell.xPos < widthMap - 1 && actualCell.yPos < heightMap - 1 && baseMap.map[actualCell.xPos + 1, actualCell.yPos + 1] == GenerationAlgorithm.CELL_TYPE.FLOOR)
-            //        )
-            //    {
-            //        return DefaultTile;
-            //    }
-            //    else
-            //    {
-            //        actualCell.options.Remove(DefaultTile);
-            //    }
-            //}
+            if (finalTiles.Count > 1 && finalTiles.Any(x => x.GetComponent<SpriteRenderer>().sprite == DefaultTile.GetComponent<SpriteRenderer>().sprite))
+            { 
+                  return DefaultTile;
+            }
         }
 
 

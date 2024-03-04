@@ -28,5 +28,6 @@ public abstract class GenerationAlgorithm : MonoBehaviour
             UnityEngine.Random.InitState(seed);
     }
 
+    public abstract void Generate(int seed = -1);
     public int getSeed() { return seed; }
 }

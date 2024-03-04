@@ -11,7 +11,7 @@ public class WaveFunctionCollapse : GenerationAlgorithm
     private int startingX,startingY;
 
 
-    public void Generate(int seed = -1)
+    public override void Generate(int seed = -1)
     {
 
         // Clean prev output

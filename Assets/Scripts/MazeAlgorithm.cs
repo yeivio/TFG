@@ -12,10 +12,7 @@ public class MazeAlgorithm : GenerationAlgorithm
     private Cell[,] cellMap; // True is Used, False is not Used
     public List<Tiles> usableTiles;
 
-    
-
-
-    public void Generate(int seed = -1)
+    public override void Generate(int seed = -1)
     {
         // Clean prev output
         int childCount = transform.childCount;

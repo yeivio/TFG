@@ -62,6 +62,7 @@ MonoBehaviour:
   - {fileID: 5232852126367171307}
   - {fileID: 2629261206462137464, guid: e2e745c0b86a4864b96e994c9cc18fe2, type: 3}
   - {fileID: 4841206301728260783, guid: 79eb805ab1939674e91e7ddb4849ea60, type: 3}
+  - {fileID: 4917708476943250546, guid: f69c319d6c743b1419aebca9e19d0e48, type: 3}
   isLeftConnected: 0
   isRightConnected: 0
   isBottomConnected: 0

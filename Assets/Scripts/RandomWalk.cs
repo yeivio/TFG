@@ -9,7 +9,7 @@ public class RandomWalk : GenerationAlgorithm
 
     private int paintedMap;
 
-    public void Generate(int seed = -1)
+    public override void Generate(int seed = -1)
     {
         paintedMap = 0;
         map = new CELL_TYPE[widthMap, heightMap];
@@ -60,16 +60,22 @@ public class RandomWalk : GenerationAlgorithm
                 paintedMap++;
             }
         }
+
+
+        for (int i = 0; i < widthMap; i++)
+            for (int j = 0; j < heightMap; j++)
+            {
+                if (map[i, j] == CELL_TYPE.NOTHING)
+                    map[i, j] = CELL_TYPE.WALL;
+            }
     }
 
     private void OnDrawGizmosSelected()
     {
-        if (Application.isPlaying)
-            return;
         if (this.map != null)
         {
-            for (int i = -1; i < heightMap+1; i++)
-                for (int j = -1; j < widthMap+1; j++)
+            for (int i = 0; i < widthMap; i++)
+                for (int j = 0; j < heightMap; j++)
                 {
                     try
                     {
