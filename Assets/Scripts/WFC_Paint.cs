@@ -8,6 +8,8 @@ public class WFC_Paint : MonoBehaviour
 {
 
     // 10 10 0.8 0 2 2 619078697
+    //917318585
+    //485950622
 
 
 
@@ -186,7 +188,7 @@ public class WFC_Paint : MonoBehaviour
              return actualCell.options[UnityEngine.Random.Range(0, actualCell.options.Count)];
         }catch(Exception e)
         {
-            Debug.LogError($"{actualCell.xPos}, {actualCell.yPos}:{e}");
+            Debug.LogError($"{actualCell.xPos}, {actualCell.yPos},{actualCell.options.Count}:{e}");
             return DefaultTile;
         }
     }

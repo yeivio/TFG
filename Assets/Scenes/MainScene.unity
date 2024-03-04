@@ -3241,7 +3241,7 @@ MonoBehaviour:
   widthMap: 10
   heightMap: 10
   tileSize: 1
-  executionTime: 34
+  executionTime: 0
   seed: 619078697
   chanceToStartAsWall: 0.8
   numberSteps: 0

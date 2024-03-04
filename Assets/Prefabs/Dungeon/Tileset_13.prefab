@@ -48,6 +48,7 @@ MonoBehaviour:
   TopPosibilities:
   - {fileID: 4841206301728260783, guid: 79eb805ab1939674e91e7ddb4849ea60, type: 3}
   - {fileID: 4917708476943250546, guid: f69c319d6c743b1419aebca9e19d0e48, type: 3}
+  - {fileID: 8654617102650138697, guid: 696c62aaf7f9d624eaa3966606d7a1eb, type: 3}
   RightPosibilities:
   - {fileID: 5232852126367171307, guid: f68f83c49722d524697aba58648f08f6, type: 3}
   - {fileID: 2944852398484093693, guid: 3786c64bedbb6a84ab63e5159d19816d, type: 3}
