@@ -46,10 +46,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TopPosibilities:
-  - {fileID: 2282911249071735717, guid: 683195fd91d65b346a44f8b4d783e702, type: 3}
   - {fileID: 1814696062280781092, guid: eed6dc7f2190570458ea49cbc5a6b8a3, type: 3}
   - {fileID: 5232852126367171307}
-  - {fileID: 2017877480012245851, guid: 8fd81901df459d743be93f7a8dda63cc, type: 3}
   - {fileID: 4917708476943250546, guid: fd658a1155ec0bd4099ed92d87e4b332, type: 3}
   RightPosibilities:
   - {fileID: 2282911249071735717, guid: 683195fd91d65b346a44f8b4d783e702, type: 3}

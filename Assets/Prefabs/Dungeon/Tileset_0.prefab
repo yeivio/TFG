@@ -61,8 +61,6 @@ MonoBehaviour:
   - {fileID: 2629261206462137464, guid: e2e745c0b86a4864b96e994c9cc18fe2, type: 3}
   BottomPosibilities:
   - {fileID: 2807362769227493026, guid: b1d3ef7084dd20142a9dca75a4080b4e, type: 3}
-  - {fileID: 2017877480012245851, guid: 8fd81901df459d743be93f7a8dda63cc, type: 3}
-  - {fileID: 5108977355352672741, guid: c9c21dd52317a1a4890f90bdcfa21bac, type: 3}
   - {fileID: 3942708070801346686, guid: 730ca1888702196488f24b6ec2ef9d73, type: 3}
   isLeftConnected: 0
   isRightConnected: 0

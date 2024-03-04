@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.12731749, g: 0.13414757, b: 0.1210787, a: 1}
+  m_IndirectSpecularColor: {r: 0.12731704, g: 0.13414727, b: 0.121078536, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -3238,11 +3238,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b165e9d48da5e447a0f5b14793116aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  widthMap: 5
-  heightMap: 5
+  widthMap: 10
+  heightMap: 10
   tileSize: 1
-  executionTime: 6
-  seed: 2088032867
+  executionTime: 34
+  seed: 619078697
   chanceToStartAsWall: 0.8
   numberSteps: 0
   MIN_CONVERSION_WALL: 2

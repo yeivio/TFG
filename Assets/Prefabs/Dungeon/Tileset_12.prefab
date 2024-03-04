@@ -50,6 +50,7 @@ MonoBehaviour:
   - {fileID: 4917708476943250546, guid: f69c319d6c743b1419aebca9e19d0e48, type: 3}
   RightPosibilities:
   - {fileID: 2632560198610051704, guid: 84b1d14834bf1504aa24ebdc3d5d9d02, type: 3}
+  - {fileID: 4841206301728260783, guid: 79eb805ab1939674e91e7ddb4849ea60, type: 3}
   LeftPosibilities:
   - {fileID: 2944852398484093693, guid: 3786c64bedbb6a84ab63e5159d19816d, type: 3}
   - {fileID: 3942708070801346686, guid: 730ca1888702196488f24b6ec2ef9d73, type: 3}

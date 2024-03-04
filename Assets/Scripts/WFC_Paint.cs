@@ -113,7 +113,7 @@ public class WFC_Paint : MonoBehaviour
         if(actualCell.options.Count > 1 ) {
             // Now we select the tile with most % of being correct. That is the 
             // the one which have more valid sides
-            Tiles finalTile = null;
+            List<Tiles> finalTiles = new List<Tiles>();
             float Maxprob = float.MinValue;
             float tileProb;
             foreach (Tiles tile in new List<Tiles>(actualCell.options))
@@ -148,25 +148,45 @@ public class WFC_Paint : MonoBehaviour
                 }
                 if (tileProb > Maxprob)
                 {
-                    if (finalTile)
-                        actualCell.options.Remove(finalTile);
-                    finalTile = tile;
+                    finalTiles.Clear();
+                    finalTiles.Add(tile);
                     Maxprob = tileProb;
                     
+                }
+                else if (tileProb == Maxprob)
+                {
+                    finalTiles.Add(tile);
                 }
                 else
                 {
                     actualCell.options.Remove(tile);
                 }
             }
+
+            if(finalTiles.Count > 1 && finalTiles.Any(x => x.GetComponent<SpriteRenderer>().sprite == DefaultTile.GetComponent<SpriteRenderer>().sprite))
+            {
+                if((actualCell.xPos > 0  && actualCell.yPos > 0 && baseMap.map[actualCell.xPos - 1, actualCell.yPos - 1] == GenerationAlgorithm.CELL_TYPE.FLOOR)
+                    || (actualCell.xPos > 0 && actualCell.yPos < heightMap - 1 && baseMap.map[actualCell.xPos - 1, actualCell.yPos + 1] == GenerationAlgorithm.CELL_TYPE.FLOOR)
+                     || (actualCell.xPos < widthMap - 1  && actualCell.yPos > 0 && baseMap.map[actualCell.xPos + 1, actualCell.yPos - 1] == GenerationAlgorithm.CELL_TYPE.FLOOR)
+                     || (actualCell.xPos < widthMap - 1 && actualCell.yPos < heightMap - 1 && baseMap.map[actualCell.xPos + 1, actualCell.yPos + 1] == GenerationAlgorithm.CELL_TYPE.FLOOR)
+                    )
+                {
+                    return DefaultTile;
+                }
+                else
+                {
+                    actualCell.options.Remove(DefaultTile);
+                }
+            }
         }
 
 
         try {
+             //return actualCell.options[UnityEngine.Random.Range(0, actualCell.options.Count)];
              return actualCell.options[UnityEngine.Random.Range(0, actualCell.options.Count)];
         }catch(Exception e)
         {
-            Debug.Log($"{actualCell.xPos}, {actualCell.yPos}:{e}");
+            Debug.LogError($"{actualCell.xPos}, {actualCell.yPos}:{e}");
             return DefaultTile;
         }
     }
@@ -351,6 +371,38 @@ public class WFC_Paint : MonoBehaviour
         else
             UnityEngine.Random.InitState(seed);
     }
+
+
+
+    public void TileVerifier()
+    {
+        foreach(Tiles tile in usableTiles)
+        {
+            foreach(Tiles topTile in tile.TopPosibilities)
+            {
+                if (!topTile.BottomPosibilities.Any(x => x == tile))
+                    Debug.LogError($"{tile} top -> {topTile} pero no el inverso");
+            }
+
+            foreach (Tiles topTile in tile.BottomPosibilities)
+            {
+                if (!topTile.TopPosibilities.Any(x => x == tile))
+                    Debug.LogError($"{tile} bottom -> {topTile} pero no el inverso");
+            }
+
+            foreach (Tiles topTile in tile.LeftPosibilities)
+            {
+                if (!topTile.RightPosibilities.Any(x => x == tile))
+                    Debug.LogError($"{tile} left -> {topTile} pero no el inverso");
+            }
+            foreach (Tiles topTile in tile.RightPosibilities)
+            {
+                if (!topTile.LeftPosibilities.Any(x => x == tile))
+                    Debug.LogError($"{tile} right -> {topTile} pero no el inverso");
+            }
+        }
+        
+    }
 }
 
 # region GizmoEditor
@@ -373,6 +425,11 @@ public class ScriptEditorWFC_Paint : Editor
         if (GUILayout.Button("Paint"))
         {
             gizmoDrawing.Generate();
+
+        }
+        if (GUILayout.Button("Verify tile rules"))
+        {
+            gizmoDrawing.TileVerifier();
 
         }
         serializedObject.ApplyModifiedProperties();
