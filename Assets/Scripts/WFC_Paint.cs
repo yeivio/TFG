@@ -163,21 +163,21 @@ public class WFC_Paint : MonoBehaviour
                 }
             }
 
-            if(finalTiles.Count > 1 && finalTiles.Any(x => x.GetComponent<SpriteRenderer>().sprite == DefaultTile.GetComponent<SpriteRenderer>().sprite))
-            {
-                if((actualCell.xPos > 0  && actualCell.yPos > 0 && baseMap.map[actualCell.xPos - 1, actualCell.yPos - 1] == GenerationAlgorithm.CELL_TYPE.FLOOR)
-                    || (actualCell.xPos > 0 && actualCell.yPos < heightMap - 1 && baseMap.map[actualCell.xPos - 1, actualCell.yPos + 1] == GenerationAlgorithm.CELL_TYPE.FLOOR)
-                     || (actualCell.xPos < widthMap - 1  && actualCell.yPos > 0 && baseMap.map[actualCell.xPos + 1, actualCell.yPos - 1] == GenerationAlgorithm.CELL_TYPE.FLOOR)
-                     || (actualCell.xPos < widthMap - 1 && actualCell.yPos < heightMap - 1 && baseMap.map[actualCell.xPos + 1, actualCell.yPos + 1] == GenerationAlgorithm.CELL_TYPE.FLOOR)
-                    )
-                {
-                    return DefaultTile;
-                }
-                else
-                {
-                    actualCell.options.Remove(DefaultTile);
-                }
-            }
+            //if(finalTiles.Count > 1 && finalTiles.Any(x => x.GetComponent<SpriteRenderer>().sprite == DefaultTile.GetComponent<SpriteRenderer>().sprite))
+            //{
+            //    if((actualCell.xPos > 0  && actualCell.yPos > 0 && baseMap.map[actualCell.xPos - 1, actualCell.yPos - 1] == GenerationAlgorithm.CELL_TYPE.FLOOR)
+            //        || (actualCell.xPos > 0 && actualCell.yPos < heightMap - 1 && baseMap.map[actualCell.xPos - 1, actualCell.yPos + 1] == GenerationAlgorithm.CELL_TYPE.FLOOR)
+            //         || (actualCell.xPos < widthMap - 1  && actualCell.yPos > 0 && baseMap.map[actualCell.xPos + 1, actualCell.yPos - 1] == GenerationAlgorithm.CELL_TYPE.FLOOR)
+            //         || (actualCell.xPos < widthMap - 1 && actualCell.yPos < heightMap - 1 && baseMap.map[actualCell.xPos + 1, actualCell.yPos + 1] == GenerationAlgorithm.CELL_TYPE.FLOOR)
+            //        )
+            //    {
+            //        return DefaultTile;
+            //    }
+            //    else
+            //    {
+            //        actualCell.options.Remove(DefaultTile);
+            //    }
+            //}
         }
 
 
