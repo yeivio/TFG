@@ -51,17 +51,13 @@ MonoBehaviour:
   - {fileID: 4917708476943250546, guid: 68ee017136e6e7c4e8b58c1d0ef1de3f, type: 3}
   - {fileID: 4917708476943250546, guid: f69c319d6c743b1419aebca9e19d0e48, type: 3}
   RightPosibilities:
-  - {fileID: 2944852398484093693, guid: 3786c64bedbb6a84ab63e5159d19816d, type: 3}
   - {fileID: 2632560198610051704, guid: 84b1d14834bf1504aa24ebdc3d5d9d02, type: 3}
-  - {fileID: 1295524559756653991, guid: 15c346230a4d9e248aac71e24812ec60, type: 3}
   LeftPosibilities:
   - {fileID: 5130514845153260131, guid: c4892c59064f1da489d74570a2fd75c5, type: 3}
   - {fileID: 8654617102650138697, guid: 696c62aaf7f9d624eaa3966606d7a1eb, type: 3}
   - {fileID: 4841206301728260783, guid: 79eb805ab1939674e91e7ddb4849ea60, type: 3}
   - {fileID: 4917708476943250546, guid: f69c319d6c743b1419aebca9e19d0e48, type: 3}
   BottomPosibilities:
-  - {fileID: 2944852398484093693, guid: 3786c64bedbb6a84ab63e5159d19816d, type: 3}
-  - {fileID: 1295524559756653991, guid: 15c346230a4d9e248aac71e24812ec60, type: 3}
   - {fileID: 2632560198610051704, guid: 84b1d14834bf1504aa24ebdc3d5d9d02, type: 3}
   isLeftConnected: 0
   isRightConnected: 0

@@ -51,6 +51,7 @@ MonoBehaviour:
   - {fileID: 2629261206462137464, guid: e2e745c0b86a4864b96e994c9cc18fe2, type: 3}
   RightPosibilities:
   - {fileID: 5130514845153260131, guid: c4892c59064f1da489d74570a2fd75c5, type: 3}
+  - {fileID: 1814696062280781092, guid: eed6dc7f2190570458ea49cbc5a6b8a3, type: 3}
   - {fileID: 2807362769227493026, guid: b1d3ef7084dd20142a9dca75a4080b4e, type: 3}
   - {fileID: 2017877480012245851, guid: 8fd81901df459d743be93f7a8dda63cc, type: 3}
   LeftPosibilities:
