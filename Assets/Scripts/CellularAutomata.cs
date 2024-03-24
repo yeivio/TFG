@@ -541,8 +541,6 @@ public class CellularAutomata : GenerationAlgorithm
         }
     }
 }
-
-
 # region GizmoEditor
 #if UNITY_EDITOR
 [CustomEditor(typeof(CellularAutomata))]
