@@ -103,7 +103,7 @@ public class RandomWalk : GenerationAlgorithm
                     }
                 }
         }
-    }
+    }    
 }
 
 # region GizmoEditor
@@ -120,6 +120,7 @@ public class ScriptEditorRW : Editor
         gizmoDrawing.heightMap = EditorGUILayout.IntSlider("Height", gizmoDrawing.heightMap, 0, 300);
         gizmoDrawing.tileSize = EditorGUILayout.IntSlider("Tile Size", gizmoDrawing.tileSize, 1, 100);
         EditorGUILayout.FloatField("Execution time (ms)", gizmoDrawing.executionTime);
+        gizmoDrawing.seed = EditorGUILayout.IntField("Seed", gizmoDrawing.seed);
         //DrawDefaultInspector(); // Draw all public variables
         EditorGUILayout.Space();
 

@@ -8,8 +8,6 @@ public class WaveFunctionCollapse : GenerationAlgorithm
     public List<Tiles> usableTiles;
     public Tiles DefaultTile;
     private Cell[,] cellMap;   // Map
-    private int startingX,startingY;
-
 
     public override void Generate(int seed = -1)
     {

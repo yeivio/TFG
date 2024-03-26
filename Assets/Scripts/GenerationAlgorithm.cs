@@ -14,7 +14,7 @@ public abstract class GenerationAlgorithm : MonoBehaviour
     #endregion
 
     public CELL_TYPE[,] map;
-    public enum CELL_TYPE { NOTHING, WALL, FLOOR, CORRIDOR, DOOR};
+    public enum CELL_TYPE { NOTHING, WALL, FLOOR, CORRIDOR, DOOR };
 
     protected void GenerateSeed(int seed = -1)
     {

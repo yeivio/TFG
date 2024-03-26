@@ -3,11 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 public class Tiles : MonoBehaviour
 {
-    public Tiles[] TopPosibilities;
-    public Tiles[] RightPosibilities;
-    public Tiles[] LeftPosibilities;
-    public Tiles[] BottomPosibilities;
+    [Header("Straight")]
+    public List<Tiles> TopPosibilities;
+    public List<Tiles> RightPosibilities;
+    public List<Tiles> LeftPosibilities;
+    public List<Tiles> BottomPosibilities;
 
+    [Header("Diagonals")]
+    public List<Tiles> TopLeftDiagonalPosibilities;
+    public List<Tiles> TopRightPosibilities;
+    public List<Tiles> BottomLeftPosibilities;
+    public List<Tiles> BottomRightPosibilities;
     [Header("Maze")]
     public bool isLeftConnected;
     public bool isRightConnected;
