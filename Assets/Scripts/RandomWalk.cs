@@ -6,6 +6,8 @@ using UnityEngine;
 public class RandomWalk : GenerationAlgorithm
 {
     public int threshold; // Percentage of the cellMap that must be painted
+    public int numMaxPasos; // Numero de pasos maximos que puede dar
+    public int numMaxAgentes; // Numero de agentes que se van a utilizar
 
     private int paintedMap;
 
@@ -15,11 +17,14 @@ public class RandomWalk : GenerationAlgorithm
         map = new CELL_TYPE[widthMap, heightMap];
         this.seed = seed;
         GenerateSeed(seed);
-        int randomX = UnityEngine.Random.Range(0, widthMap);
-        int randomY = UnityEngine.Random.Range(0, heightMap);
+        int randomX = widthMap / 2;
+        int randomY = heightMap / 2;
         map[randomX, randomY] = CELL_TYPE.FLOOR;
         paintedMap++;
-        while ((float)(paintedMap / (float)(widthMap * heightMap)) < (float)(threshold / 100f))
+
+        float numPasos = 0;
+        float numAgentes = 0;
+        while ((float)(paintedMap / (float)(widthMap * heightMap)) < (float)(threshold / 100f) && numAgentes < numMaxAgentes)
         {
             int randomDir = UnityEngine.Random.Range(0, 4);
             
@@ -59,51 +64,64 @@ public class RandomWalk : GenerationAlgorithm
                 map[randomX, randomY] = CELL_TYPE.FLOOR;
                 paintedMap++;
             }
+
+
+            numPasos++;
+
+            // Se resetea si es necesario
+            if (numPasos >= numMaxPasos)
+            {
+                randomX = widthMap / 2;
+                randomY = heightMap / 2;
+                numAgentes++;
+                numPasos = 0;
+            }
         }
 
 
-        for (int i = 0; i < widthMap; i++)
+        for (int i = 0; i < widthMap; i++) { 
             for (int j = 0; j < heightMap; j++)
             {
                 if (map[i, j] == CELL_TYPE.NOTHING)
                     map[i, j] = CELL_TYPE.WALL;
             }
+        }
     }
 
-    private void OnDrawGizmosSelected()
-    {
-        if (this.map != null)
-        {
-            for (int i = 0; i < widthMap; i++)
-                for (int j = 0; j < heightMap; j++)
-                {
-                    try
-                    {
-                        switch (map[i, j])
-                        {
-                            case CELL_TYPE.WALL:
-                                Gizmos.color = Color.black;
-                                break;
-                            case CELL_TYPE.FLOOR:
-                                Gizmos.color = Color.white;
-                                break;
-                            case CELL_TYPE.CORRIDOR:
-                                Gizmos.color = Color.grey;
-                                break;
-                            case CELL_TYPE.NOTHING:
-                                Gizmos.color = Color.red;
-                                break;
-                        }
-                        Gizmos.DrawCube(new Vector3(tileSize * j + 0.5f, tileSize * i + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
-                    }
-                    catch
-                    {
-                        Gizmos.color = Color.gray;
-                        Gizmos.DrawCube(new Vector3(tileSize * j + 0.5f, tileSize * i + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
-                    }
-                }
-        }
-    }    
+    //private void OnDrawGizmosSelected()
+    //{
+    //    if (this.map != null)
+    //    {
+    //        for (int i = 0; i < widthMap; i++)
+    //            for (int j = 0; j < heightMap; j++)
+    //            {
+    //                try
+    //                {
+    //                    switch (map[i, j])
+    //                    {
+    //                        case CELL_TYPE.WALL:
+    //                            Gizmos.color = Color.black;
+    //                            break;
+    //                        case CELL_TYPE.FLOOR:
+    //                            Gizmos.color = Color.white;
+    //                            break;
+    //                        case CELL_TYPE.CORRIDOR:
+    //                            Gizmos.color = Color.grey;
+    //                            break;
+    //                        case CELL_TYPE.NOTHING:
+    //                            Gizmos.color = Color.red;
+    //                            break;
+    //                    }
+    //                    Gizmos.DrawCube(new Vector3(tileSize * j + 0.5f, tileSize * i + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
+    //                }
+    //                catch
+    //                {
+    //                    Gizmos.color = Color.gray;
+    //                    Gizmos.DrawCube(new Vector3(tileSize * j + 0.5f, tileSize * i + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
+    //                }
+    //            }
+    //    }
+    //}    
 }
 
 # region GizmoEditor
@@ -119,13 +137,15 @@ public class ScriptEditorRW : Editor
         gizmoDrawing.widthMap = EditorGUILayout.IntSlider("Width", gizmoDrawing.widthMap, 0, 300);
         gizmoDrawing.heightMap = EditorGUILayout.IntSlider("Height", gizmoDrawing.heightMap, 0, 300);
         gizmoDrawing.tileSize = EditorGUILayout.IntSlider("Tile Size", gizmoDrawing.tileSize, 1, 100);
+        
         EditorGUILayout.FloatField("Execution time (ms)", gizmoDrawing.executionTime);
         gizmoDrawing.seed = EditorGUILayout.IntField("Seed", gizmoDrawing.seed);
         //DrawDefaultInspector(); // Draw all public variables
         EditorGUILayout.Space();
 
         gizmoDrawing.threshold = EditorGUILayout.IntSlider("% Fill of cellMap", gizmoDrawing.threshold, 0, 100);
-
+        gizmoDrawing.numMaxAgentes = EditorGUILayout.IntField("Num Max de agentes", gizmoDrawing.numMaxAgentes);
+        gizmoDrawing.numMaxPasos = EditorGUILayout.IntField("Max num pasos", gizmoDrawing.numMaxPasos);
         if (GUILayout.Button("Generate cellular automata"))
         {
             gizmoDrawing.Generate(gizmoDrawing.seed);

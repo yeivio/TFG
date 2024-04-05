@@ -24,6 +24,12 @@ public class BSPTree : GenerationAlgorithm
         Debug.Log("s:" + this.seed);
         RoomNode a = new RoomNode(new Vector2Int(0, 0), new Vector2Int(widthMap - 1, heightMap - 1), new List<Vector2Int>());
         this.map = RoomNode.map;
+
+        for(int i = 0; i < widthMap; i++)
+            for(int j = 0;  j < heightMap; j++)
+            if (map[i,j] == CELL_TYPE.NOTHING)
+                    map[i,j] = CELL_TYPE.WALL;
+
     }
     private class RoomNode
     {
@@ -336,43 +342,43 @@ public class BSPTree : GenerationAlgorithm
         }
     }
 
-    private void OnDrawGizmosSelected()
-    {
-        if (this.map != null && this.gameObject.GetComponent<BSPTree>().isActiveAndEnabled)
-        {
-            for (int i = 0; i < widthMap; i++)
-                for (int j = 0; j < heightMap; j++)
-                {
-                    try
-                    {
+    //private void OnDrawGizmosSelected()
+    //{
+    //    if (this.map != null && this.gameObject.GetComponent<BSPTree>().isActiveAndEnabled)
+    //    {
+    //        for (int i = 0; i < widthMap; i++)
+    //            for (int j = 0; j < heightMap; j++)
+    //            {
+    //                try
+    //                {
 
-                        switch (map[i, j])
-                        {
-                            case CELL_TYPE.WALL:
-                                Gizmos.color = Color.black;
-                                break;
-                            case CELL_TYPE.FLOOR:
-                                Gizmos.color = Color.white;
-                                break;
-                            case CELL_TYPE.CORRIDOR:
-                                Gizmos.color = Color.grey;
-                                break;
-                            case CELL_TYPE.NOTHING:
-                                Gizmos.color = Color.black;
-                                break;
-                        }
+    //                    switch (map[i, j])
+    //                    {
+    //                        case CELL_TYPE.WALL:
+    //                            Gizmos.color = Color.black;
+    //                            break;
+    //                        case CELL_TYPE.FLOOR:
+    //                            Gizmos.color = Color.white;
+    //                            break;
+    //                        case CELL_TYPE.CORRIDOR:
+    //                            Gizmos.color = Color.grey;
+    //                            break;
+    //                        case CELL_TYPE.NOTHING:
+    //                            Gizmos.color = Color.black;
+    //                            break;
+    //                    }
 
 
-                        Gizmos.DrawCube(new Vector3(tileSize * i + 0.5f, tileSize * j + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
-                    }
-                    catch
-                    {
-                        Gizmos.color = Color.gray;
-                        Gizmos.DrawCube(new Vector3(tileSize * i + 0.5f, tileSize * j + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
-                    }
-                }
-        }
-    }
+    //                    Gizmos.DrawCube(new Vector3(tileSize * i + 0.5f, tileSize * j + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
+    //                }
+    //                catch
+    //                {
+    //                    Gizmos.color = Color.gray;
+    //                    Gizmos.DrawCube(new Vector3(tileSize * i + 0.5f, tileSize * j + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
+    //                }
+    //            }
+    //    }
+    //}
 }
 
 

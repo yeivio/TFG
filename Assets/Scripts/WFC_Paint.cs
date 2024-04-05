@@ -44,20 +44,12 @@ public class WFC_Paint : MonoBehaviour
         this.seed = baseMap.seed;
         baseMap.Generate(seed);
 
-        float a;
         CleanMap();
         while (CheckEnd() && limitBuc > 0)
         {
             //List<Cell> sortedTiles = SortedTiles(); // Find the tiles with the lowest entropy
             List<Cell> sortedTiles = SortedTiles2(); // Find the tiles with the lowest entropy
             Cell actualCell = sortedTiles[0];
-
-
-
-            if ((actualCell.xPos == 0 && (actualCell.yPos == 10 || actualCell.yPos == 11 || actualCell.yPos == 9)
-                    || actualCell.xPos == 1 && (actualCell.yPos == 10 || actualCell.yPos == 11 || actualCell.yPos == 9)
-                    || actualCell.xPos == 2 && actualCell.yPos == 9))
-                a = 0;
 
             if (actualCell.options.Count == 0) // Doesn't have any tile options
             {
@@ -277,7 +269,7 @@ public class WFC_Paint : MonoBehaviour
             aux.AddComponent<SpriteRenderer>().sprite = cellMap[x, y].options[0].GetComponent<SpriteRenderer>().sprite;
             tileMaps[x, y] = aux.GetComponent<SpriteRenderer>();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             Debug.Log("Error");
         }

@@ -36,7 +36,7 @@ public class MazeAlgorithm : GenerationAlgorithm
         }
         int startingX = UnityEngine.Random.Range(0, widthMap);
         int startingY = UnityEngine.Random.Range(0, heightMap);
-        while(!allCellsExplored() )
+        while(!allCellsExplored())
         {
             kill(startingX, startingY);
             Vector2Int aux = hunt();
@@ -134,7 +134,7 @@ public class MazeAlgorithm : GenerationAlgorithm
         GameObject aux = new GameObject().gameObject;
         try { 
             aux.AddComponent<SpriteRenderer>().sprite = options[num].GetComponent<SpriteRenderer>().sprite;
-        }catch (Exception ex)
+        }catch (Exception)
         {
             Debug.Log("Seed:" + seed);
         }

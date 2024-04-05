@@ -37,6 +37,8 @@ public class CellularAutomata : GenerationAlgorithm
         {
             simulationStep();
         }
+
+
         FilteringProcess(wallSizeThreshold, roomSizeThreshold);
         GenerateCorridors();
 
@@ -115,6 +117,7 @@ public class CellularAutomata : GenerationAlgorithm
             }
         }
         this.map = copyMap;
+        
         return copyMap;
     }
 
@@ -485,7 +488,6 @@ public class CellularAutomata : GenerationAlgorithm
                 this.borderCoords.Add(coord);
         }
         public List<Coords> getBorderList() { return this.borderCoords; }
-        public List<Coords> getRegionList() { return this.regionCoords; }
         public List<Region> getConnectedList() { return this.connectedRegion; }
     }
 
@@ -505,72 +507,6 @@ public class CellularAutomata : GenerationAlgorithm
         public int Region { get; set; }
     }
 
-    private void OnDrawGizmos()
-    {
-
-        if (this.map != null)
-        {
-            for (int x = 0; x < widthMap + 1 ; x++)
-                for (int y = 0; y < heightMap + 1 ; y++)
-                {
-                    if (x == 0 || y == 0 || x == widthMap || y == heightMap)
-                    {
-                        Gizmos.color = Color.black;
-                        Gizmos.DrawCube(new Vector3(tileSize * x + 0.5f, tileSize * y + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
-                    }
-                    else
-                    {
-                        int i = x - 1;
-                        int j = y - 1;
-                        try
-                        {
-                            switch (map[i, j])
-                            {
-                                case CELL_TYPE.WALL:
-                                    Gizmos.color = Color.black;
-                                    break;
-                                case CELL_TYPE.FLOOR:
-                                    Gizmos.color = Color.white;
-                                    break;
-                                case CELL_TYPE.CORRIDOR:
-                                    Gizmos.color = Color.grey;
-                                    break;
-                                case CELL_TYPE.NOTHING:
-                                    Gizmos.color = Color.red;
-                                    break;
-                            }
-                            Gizmos.DrawCube(new Vector3(tileSize * x + 0.5f, tileSize * y + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
-                            //Gizmos.DrawCube(new Vector3(tileSize * i + 0.5f, tileSize * j + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
-                        }
-                        catch
-                        {
-                            Gizmos.color = Color.magenta;
-                            Gizmos.DrawCube(new Vector3(tileSize * x + 0.5f, tileSize * y + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
-                            //Gizmos.DrawCube(new Vector3(tileSize * i + 0.5f, tileSize * j + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
-                        }
-                    }
-                }
-        }
-    }
-    public CELL_TYPE[,] getBorderMap()
-    {
-        CELL_TYPE[,] auxmap = new CELL_TYPE[this.map.GetLength(0) + 1, this.map.GetLength(1) + 1];
-        for (int x = 0; x < widthMap + 1; x++)
-            for (int y = 0; y < heightMap + 1; y++)
-            {
-                if (x == 0 || y == 0 || x == widthMap || y == heightMap)
-                {
-                    auxmap[x, y] = CELL_TYPE.WALL;
-                }
-                else
-                {
-                    int i = x - 1;
-                    int j = y - 1;
-                    auxmap[x, y] = this.map[i, j];
-                }
-            }
-        return auxmap;
-    }
 }
 # region GizmoEditor
 #if UNITY_EDITOR

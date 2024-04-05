@@ -65,7 +65,7 @@ public class WaveFunctionCollapse : GenerationAlgorithm
         {
             aux.AddComponent<SpriteRenderer>().sprite = cellMap[x, y].options[0].GetComponent<SpriteRenderer>().sprite;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             Debug.Log("Seed:" + seed);
         }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
+using static UnityEngine.UI.Image;
 
 public class GrammarBased : GenerationAlgorithm
 {
@@ -23,6 +24,7 @@ public class GrammarBased : GenerationAlgorithm
 
     private Dictionary<string, List<string>> listaReglas;
     
+
     private float bucleBreak1;
     private float bucleBreak2;
     private float bucleBreak3;
@@ -36,7 +38,7 @@ public class GrammarBased : GenerationAlgorithm
 
         bucleBreak3 = 0;
         
-        while (ComprobarReglas(cadenaInicial) && bucleBreak3 < 1000)
+        while (ComprobarReglas(cadenaInicial) && bucleBreak3 < 100)
         {
             bucleBreak3++;
             cadenaInicial = AplicarReglas(cadenaInicial);
@@ -58,30 +60,16 @@ public class GrammarBased : GenerationAlgorithm
             index++;
         }
         antecedente = cadena[index];
-        //Borramos el antecedente en la regla original
-        cadena.Remove(index);
         
         // Se elige un consecuente aleatorio entre los posibles.
         int conseucneteIndex = UnityEngine.Random.Range(0, listaReglas[antecedente.ToString()].Count);
         string consecuente = listaReglas[antecedente.ToString()][conseucneteIndex];
-        string cadenaResultante;
+        string modificado = cadena.Substring(0, index) + consecuente + cadena.Substring(index + 1);
+        string a1 = cadena.Substring(0, index);
+        string a2 = cadena.Substring(index + 1);
 
-        if(index == 0)
-        {
-            cadenaResultante = consecuente + cadena;
-        }
-        else if( index == cadena.Length)
-        {
-            cadenaResultante = cadena + consecuente;
-        }
-        else
-        {
-            cadenaResultante = cadena.TrimStart(cadena[index]) + consecuente
-                 + cadena.TrimEnd(cadena[index]);
-        }
-        
 
-        return cadenaResultante;
+        return modificado;
     }
     private void RegistrarReglas()
     {
