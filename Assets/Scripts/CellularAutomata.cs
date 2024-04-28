@@ -3,6 +3,9 @@ using UnityEngine;
 using System;
 using UnityEditor;
 using Unity.VisualScripting;
+using Unity.Profiling;
+using NUnit.Framework.Constraints;
+using System.IO;
 
 public class CellularAutomata : GenerationAlgorithm
 {
@@ -15,37 +18,68 @@ public class CellularAutomata : GenerationAlgorithm
     public int numberSteps; // Number of iterations
     public int MIN_CONVERSION_WALL; // Min number of walls the cell must be surrounded to become a wall
     public int MIN_CONVERSION_BLANK; // Min number of empty the cell must be surrounded to become an empty
-    public int wallSizeThreshold = 0; // Min region size of walls that can exist
-    public int roomSizeThreshold = 0; // Min region size of room that can exist
+    public int wallSizeThreshold; // Min region size of walls that can exist
+    public int roomSizeThreshold; // Min region size of room that can exist
     #endregion
 
     private List<List<Coords>> wallRegions;
     private List<List<Coords>> roomRegions;
 
+
+
+    public void DataMeassure(int seed = -1)
+    {
+        base.startGridSize = 50;
+        base.endGridSize = 350;
+        base.intervalGridSize = 50;
+        List<String> textoCabecera = new List<String>();
+        List<String> textoData = new List<String>();
+        int numPruebas = 5;
+        for (int i = base.startGridSize; i <= base.endGridSize; i += base.intervalGridSize)
+        {
+            textoCabecera.Add(i.ToString());
+        }
+        for (int i = base.startGridSize; i <= base.endGridSize; i += base.intervalGridSize)
+        {
+            var totalPruebas = (long)0;
+            for(int j = 0; j <= numPruebas; j++)
+            {
+                this.widthMap = i;
+                this.heightMap = i;
+                var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
+                this.Generate(seed);
+                watch.Stop();
+                totalPruebas += watch.ElapsedMilliseconds; // This is in ms
+                //textoData.Add(executionTime.ToString());
+            }
+            textoData.Add(((long)(totalPruebas/ numPruebas)).ToString());
+        }
+
+        using (StreamWriter writer = new StreamWriter("GE.csv"))
+        {
+            // Escribir la primera fila con los números
+            writer.WriteLine(string.Join(";", textoCabecera));
+
+            // Escribir la segunda fila con los valores
+            writer.WriteLine(string.Join(";", textoData));
+        }
+    }
+
     public override void Generate(int seed = -1)
     {
-
         map = new CELL_TYPE[widthMap, heightMap];
         this.seed = seed;
         GenerateSeed(seed);
-
-        var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
-
         GenerateRandomStart();
 
         for (int i = 0; i < this.numberSteps; i++)
         {
             simulationStep();
         }
-
-
         FilteringProcess(wallSizeThreshold, roomSizeThreshold);
         GenerateCorridors();
-
-        watch.Stop();
-        executionTime = watch.ElapsedMilliseconds;
-        if (GetAllRegionsOfType(CELL_TYPE.FLOOR).Count > 1)
-            Debug.LogError("CellularAutomata:" + this.seed);
+        //if (GetAllRegionsOfType(CELL_TYPE.FLOOR).Count > 1)
+        //    Debug.LogError("CellularAutomata:" + this.seed);
     }
 
 
@@ -508,7 +542,7 @@ public class CellularAutomata : GenerationAlgorithm
     }
 
 }
-# region GizmoEditor
+#region GizmoEditor
 #if UNITY_EDITOR
 [CustomEditor(typeof(CellularAutomata))]
 public class ScriptEditorCA : Editor
@@ -522,6 +556,7 @@ public class ScriptEditorCA : Editor
         gizmoDrawing.heightMap = EditorGUILayout.IntSlider("Height", gizmoDrawing.heightMap, 0, 300);
         gizmoDrawing.tileSize = EditorGUILayout.IntSlider("Tile Size", gizmoDrawing.tileSize, 1, 100);
         EditorGUILayout.FloatField("Execution time (ms)", gizmoDrawing.executionTime);
+        EditorGUILayout.FloatField("Memory Consumption time (ms)", gizmoDrawing.memoryConsumption);
         //DrawDefaultInspector(); // Draw all public variables
         EditorGUILayout.Space();
 
@@ -536,12 +571,17 @@ public class ScriptEditorCA : Editor
 
         if (GUILayout.Button("Generate cellular automata"))
         {
-            gizmoDrawing.Generate(gizmoDrawing.seed);
-
+            // Call the function
+            gizmoDrawing.Generate(gizmoDrawing.seed); 
+            
         }
         if (GUILayout.Button("Generate random cellular automata"))
         {
             gizmoDrawing.Generate();
+        }
+        if (GUILayout.Button("MeassureTime"))
+        {
+            gizmoDrawing.DataMeassure();
         }
 
         if (GUI.changed)

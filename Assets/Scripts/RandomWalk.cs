@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -10,6 +12,47 @@ public class RandomWalk : GenerationAlgorithm
     public int numMaxAgentes; // Numero de agentes que se van a utilizar
 
     private int paintedMap;
+
+
+    public void DataMeassure(int seed = -1)
+    {
+        base.startGridSize = 50;
+        base.endGridSize = 350;
+        base.intervalGridSize = 50;
+        
+        List<String> textoCabecera = new List<String>();
+        List<String> textoData = new List<String>();
+        int numPruebas = 5;
+        for (int i = base.startGridSize; i <= base.endGridSize; i += base.intervalGridSize)
+        {
+            textoCabecera.Add(i.ToString());
+        }
+        for (int i = base.startGridSize; i <= base.endGridSize; i += base.intervalGridSize)
+        {
+            var totalPruebas = (long)0;
+            for (int j = 0; j <= numPruebas; j++)
+            {
+                this.widthMap = i;
+                this.heightMap = i;
+                var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
+                this.Generate(seed);
+                watch.Stop();
+                totalPruebas += watch.ElapsedMilliseconds; // This is in ms
+                //textoData.Add(executionTime.ToString());
+            }
+            textoData.Add(((long)(totalPruebas / numPruebas)).ToString());
+        }
+
+        using (StreamWriter writer = new StreamWriter("RW.csv"))
+        {
+            // Escribir la primera fila con los números
+            writer.WriteLine(string.Join(";", textoCabecera));
+
+            // Escribir la segunda fila con los valores
+            writer.WriteLine(string.Join(";", textoData));
+        }
+    }
+
 
     public override void Generate(int seed = -1)
     {
@@ -87,41 +130,6 @@ public class RandomWalk : GenerationAlgorithm
             }
         }
     }
-
-    //private void OnDrawGizmosSelected()
-    //{
-    //    if (this.map != null)
-    //    {
-    //        for (int i = 0; i < widthMap; i++)
-    //            for (int j = 0; j < heightMap; j++)
-    //            {
-    //                try
-    //                {
-    //                    switch (map[i, j])
-    //                    {
-    //                        case CELL_TYPE.WALL:
-    //                            Gizmos.color = Color.black;
-    //                            break;
-    //                        case CELL_TYPE.FLOOR:
-    //                            Gizmos.color = Color.white;
-    //                            break;
-    //                        case CELL_TYPE.CORRIDOR:
-    //                            Gizmos.color = Color.grey;
-    //                            break;
-    //                        case CELL_TYPE.NOTHING:
-    //                            Gizmos.color = Color.red;
-    //                            break;
-    //                    }
-    //                    Gizmos.DrawCube(new Vector3(tileSize * j + 0.5f, tileSize * i + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
-    //                }
-    //                catch
-    //                {
-    //                    Gizmos.color = Color.gray;
-    //                    Gizmos.DrawCube(new Vector3(tileSize * j + 0.5f, tileSize * i + 0.5f, 0), new Vector3(tileSize, tileSize, 1));
-    //                }
-    //            }
-    //    }
-    //}    
 }
 
 # region GizmoEditor
@@ -155,6 +163,10 @@ public class ScriptEditorRW : Editor
         if (GUILayout.Button("Generate random cellular automata"))
         {
             gizmoDrawing.Generate();
+        }
+        if (GUILayout.Button("MeassureTime"))
+        {
+            gizmoDrawing.DataMeassure();
         }
 
         if (GUI.changed)

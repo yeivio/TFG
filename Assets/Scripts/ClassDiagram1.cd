@@ -1,0 +1,177 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="GenerationAlgorithm">
+    <Position X="18.25" Y="0.5" Width="2" />
+    <NestedTypes>
+      <Enum Name="GenerationAlgorithm.CELL_TYPE" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\Scripts\GenerationAlgorithm.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAkEABAAQAAQAAAAAAAAAAAAAAAEAAAAAAAAEAAAYA=</HashCode>
+      <FileName>Assets\Scripts\GenerationAlgorithm.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BSPTree">
+    <Position X="12.5" Y="7.25" Width="1.5" />
+    <NestedTypes>
+      <Class Name="BSPTree.RoomNode" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\Scripts\BSPTree.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="BSPTree.Room" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\Scripts\BSPTree.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAIAAIAAAIACAAAAAAAAAAAEAAAAA=</HashCode>
+      <FileName>Assets\Scripts\BSPTree.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CellularAutomata">
+    <Position X="14.75" Y="7.25" Width="1.5" />
+    <NestedTypes>
+      <Struct Name="CellularAutomata.RegionDistance" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\Scripts\CellularAutomata.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+      <Class Name="CellularAutomata.Region" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\Scripts\CellularAutomata.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Struct Name="CellularAutomata.Coords" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\Scripts\CellularAutomata.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>CAAEAQCAgAAAAIAAQAAAAAAAQAAAAACCEGIAIEIIAAI=</HashCode>
+      <FileName>Assets\Scripts\CellularAutomata.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MazeAlgorithm">
+    <Position X="17.25" Y="7" Width="1.5" />
+    <NestedTypes>
+      <Class Name="MazeAlgorithm.Cell" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\Scripts\MazeAlgorithm.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>MAAAAAAAICIAAABAAAAAAAAAAAgAEAAAAAKAAEAAAAA=</HashCode>
+      <FileName>Assets\Scripts\MazeAlgorithm.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RandomWalk">
+    <Position X="19.25" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAEAAAAAAQAAAAAAAAAAAAAAACAAAAAAAEAAABA=</HashCode>
+      <FileName>Assets\Scripts\RandomWalk.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WaveFunctionCollapse">
+    <Position X="21.5" Y="7.25" Width="2" />
+    <NestedTypes>
+      <Class Name="WaveFunctionCollapse.Cell" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\Scripts\WaveFunctionCollapse.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAACAAAAAAAAAAAAAAAAgAAAABEBAAAkAAIAA=</HashCode>
+      <FileName>Assets\Scripts\WaveFunctionCollapse.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="WFC_Paint">
+    <Position X="23.75" Y="7.25" Width="1.5" />
+    <NestedTypes>
+      <Class Name="WFC_Paint.Cell" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Assets\Scripts\WFC_Paint.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>IgABABAABCAAAAAAACAAAAAAAAgAAABBEBIAAkAAIIA=</HashCode>
+      <FileName>Assets\Scripts\WFC_Paint.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScriptEditorMaze" Collapsed="true">
+    <Position X="26.75" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAEAAAAACAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\MazeAlgorithm.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UnityEditor.Editor" Collapsed="true">
+    <Position X="36.5" Y="2" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="ScriptEditorGB" Collapsed="true">
+    <Position X="9.5" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAEAAAAACAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\GrammarBased.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScriptEditorRWP" Collapsed="true">
+    <Position X="29" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAEAAAAACAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\RandomWalkPure.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScriptEditorBSP" Collapsed="true">
+    <Position X="31.25" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAEAAAAACAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\BSPTree.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScriptEditorCA" Collapsed="true">
+    <Position X="33.5" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAEAAAAACAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\CellularAutomata.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScriptEditorOldBSP" Collapsed="true">
+    <Position X="35.75" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAEAAAAACAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\OldBSP.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScriptEditorRW" Collapsed="true">
+    <Position X="38" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAEAAAAACAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\RandomWalk.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScriptEditorWFC" Collapsed="true">
+    <Position X="40.25" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAEAAAAACAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\WaveFunctionCollapse.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScriptEditorWFC_Paint" Collapsed="true">
+    <Position X="42.5" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAEAAAAACAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Assets\Scripts\WFC_Paint.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

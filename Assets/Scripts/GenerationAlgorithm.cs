@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using UnityEditor;
 using UnityEngine;
 
@@ -9,12 +10,17 @@ public abstract class GenerationAlgorithm : MonoBehaviour
     public int widthMap;
     public int heightMap;
     public int tileSize;    // Size of each tile on the canvas
-    public long executionTime;
+    public long executionTime; // in ms
+    public long memoryConsumption; // in bytes
     public int seed;
     #endregion
 
     public CELL_TYPE[,] map;
     public enum CELL_TYPE { NOTHING, WALL, FLOOR, CORRIDOR, DOOR };
+
+    public int startGridSize = 50;
+    public int endGridSize = 400;
+    public int intervalGridSize = 50;
 
     protected void GenerateSeed(int seed = -1)
     {

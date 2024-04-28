@@ -1,6 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
+using System.IO;
+using System;
+using Random = UnityEngine.Random;
 
 public class BSPTree : GenerationAlgorithm
 {
@@ -9,7 +12,44 @@ public class BSPTree : GenerationAlgorithm
     public int max_room_width;
     public int min_room_height;
     public int max_room_height;
+    public void DataMeassure(int seed = -1)
+    {
+        base.startGridSize = 50;
+        base.endGridSize = 350;
+        base.intervalGridSize = 50;
+        List<String> textoCabecera = new List<String>();
+        List<String> textoData = new List<String>();
+        int numPruebas = 5;
+        for (int i = base.startGridSize; i <= base.endGridSize; i += base.intervalGridSize)
+        {
+            textoCabecera.Add(i.ToString());
+        }
+        for (int i = base.startGridSize; i <= base.endGridSize; i += base.intervalGridSize)
+        {
+            var totalPruebas = (long)0;
+            for (int j = 0; j <= numPruebas; j++)
+            {
+                this.widthMap = i;
+                this.heightMap = i;
+                var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
+                this.Generate(seed);
+                watch.Stop();
+                totalPruebas += watch.ElapsedMilliseconds; // This is in ms
+                Debug.Log(watch.ElapsedMilliseconds);
+                //textoData.Add(executionTime.ToString());
+            }
+            textoData.Add(((long)(totalPruebas / numPruebas)).ToString());
+        }
 
+        using (StreamWriter writer = new StreamWriter("BSP.csv"))
+        {
+            // Escribir la primera fila con los números
+            writer.WriteLine(string.Join(";", textoCabecera));
+
+            // Escribir la segunda fila con los valores
+            writer.WriteLine(string.Join(";", textoData));
+        }
+    }
     public override void Generate(int seed = -1)
     {
         this.seed = seed;
@@ -21,7 +61,7 @@ public class BSPTree : GenerationAlgorithm
 
 
 
-        Debug.Log("s:" + this.seed);
+        //Debug.Log("s:" + this.seed);
         RoomNode a = new RoomNode(new Vector2Int(0, 0), new Vector2Int(widthMap - 1, heightMap - 1), new List<Vector2Int>());
         this.map = RoomNode.map;
 
@@ -415,6 +455,10 @@ public class ScriptEditorBSP : Editor
         if (GUILayout.Button("Generate Random BSP"))
         {
             gizmoDrawing.Generate();
+        }
+        if (GUILayout.Button("MeassureTime"))
+        {
+            gizmoDrawing.DataMeassure();
         }
 
         if (GUI.changed)

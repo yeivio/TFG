@@ -6,30 +6,28 @@ using System.Linq;
 using static GenerationAlgorithm;
 using Unity.VisualScripting;
 
-public class WFC_Paint : MonoBehaviour
+public class WFC_Paint : GenerationAlgorithm
 {
+
 
     // wrong 10 10 0.893 0 2 2 728405002 5 0
     public GenerationAlgorithm baseMap;
-    private int widthMap;
-    private int heightMap;
     public List<Tiles> usableTiles;
     public Tiles DefaultTile;
     public Tiles ErrorTile;
     private Cell[,] cellMap;   // Map
     private SpriteRenderer[,] tileMaps; // Visual representation of cellMap
 
-    public int seed;
-
     private int limitBuc;
 
-    public void Generate()
+    public override void Generate(int seed = -1)
     {
         limitBuc = 200000;
         this.widthMap = baseMap.widthMap;
         this.heightMap = baseMap.heightMap;
         tileMaps = new SpriteRenderer[widthMap, heightMap];
-        //GenerateSeed(-953493837);
+        this.seed = seed;
+        GenerateSeed(seed);
 
         // Clean prev output
         int childCount = transform.childCount;
@@ -539,18 +537,7 @@ public class WFC_Paint : MonoBehaviour
             this.yPos = yPos;
         }
     }
-    protected void GenerateSeed(int seed = -1)
-    {
-        int tempSeed = (int)DateTime.Now.Ticks;
-        if (seed == -1) // No seed 
-        {
-            Debug.Log("No hay seed");
-            UnityEngine.Random.InitState(tempSeed);
-            this.seed = tempSeed;
-        }
-        else
-            UnityEngine.Random.InitState(seed);
-    }
+
     public void TileVerifier()
     {
         foreach(Tiles tile in usableTiles)
