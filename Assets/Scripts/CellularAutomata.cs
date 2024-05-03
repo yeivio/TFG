@@ -30,11 +30,11 @@ public class CellularAutomata : GenerationAlgorithm
     public void DataMeassure(int seed = -1)
     {
         base.startGridSize = 50;
-        base.endGridSize = 350;
+        base.endGridSize = 600;
         base.intervalGridSize = 50;
         List<String> textoCabecera = new List<String>();
         List<String> textoData = new List<String>();
-        int numPruebas = 5;
+        int numPruebas = 2;
         for (int i = base.startGridSize; i <= base.endGridSize; i += base.intervalGridSize)
         {
             textoCabecera.Add(i.ToString());

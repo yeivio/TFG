@@ -4,6 +4,9 @@ using UnityEditor;
 using System.IO;
 using System;
 using Random = UnityEngine.Random;
+using System.Diagnostics;
+using Debug = UnityEngine.Debug;
+using UnityEngine.Profiling;
 
 public class BSPTree : GenerationAlgorithm
 {
@@ -15,7 +18,7 @@ public class BSPTree : GenerationAlgorithm
     public void DataMeassure(int seed = -1)
     {
         base.startGridSize = 50;
-        base.endGridSize = 350;
+        base.endGridSize = 600;
         base.intervalGridSize = 50;
         List<String> textoCabecera = new List<String>();
         List<String> textoData = new List<String>();
@@ -31,11 +34,12 @@ public class BSPTree : GenerationAlgorithm
             {
                 this.widthMap = i;
                 this.heightMap = i;
-                var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
+
+                Stopwatch sw = Stopwatch.StartNew();
                 this.Generate(seed);
-                watch.Stop();
-                totalPruebas += watch.ElapsedMilliseconds; // This is in ms
-                Debug.Log(watch.ElapsedMilliseconds);
+                sw.Stop();
+                totalPruebas += sw.ElapsedMilliseconds; // This is in ms
+                Debug.Log(sw.ElapsedMilliseconds);
                 //textoData.Add(executionTime.ToString());
             }
             textoData.Add(((long)(totalPruebas / numPruebas)).ToString());
@@ -52,6 +56,7 @@ public class BSPTree : GenerationAlgorithm
     }
     public override void Generate(int seed = -1)
     {
+        Profiler.BeginSample("BSP");
         this.seed = seed;
         GenerateSeed(seed);
         map = new CELL_TYPE[widthMap, heightMap];
@@ -69,6 +74,7 @@ public class BSPTree : GenerationAlgorithm
             for(int j = 0;  j < heightMap; j++)
             if (map[i,j] == CELL_TYPE.NOTHING)
                     map[i,j] = CELL_TYPE.WALL;
+        Profiler.EndSample();
 
     }
     private class RoomNode
