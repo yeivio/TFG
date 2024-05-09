@@ -2,10 +2,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using UnityEditor;
-using Unity.VisualScripting;
-using Unity.Profiling;
-using NUnit.Framework.Constraints;
 using System.IO;
+using UnityEngine.Profiling;
+using Unity.Profiling;
+using System.Text;
+using System.Threading.Tasks;
 
 public class CellularAutomata : GenerationAlgorithm
 {
@@ -65,6 +66,13 @@ public class CellularAutomata : GenerationAlgorithm
         }
     }
 
+    private void Update()
+    {
+        Profiler.BeginSample("CEMEDIDA");
+        Generate();
+        Profiler.EndSample();
+    }
+
     public override void Generate(int seed = -1)
     {
         map = new CELL_TYPE[widthMap, heightMap];
@@ -78,11 +86,9 @@ public class CellularAutomata : GenerationAlgorithm
         }
         FilteringProcess(wallSizeThreshold, roomSizeThreshold);
         GenerateCorridors();
-        //if (GetAllRegionsOfType(CELL_TYPE.FLOOR).Count > 1)
-        //    Debug.LogError("CellularAutomata:" + this.seed);
+        if (GetAllRegionsOfType(CELL_TYPE.FLOOR).Count > 1)
+            Debug.LogError("CellularAutomata:" + this.seed);
     }
-
-
 
     private void GenerateRandomStart()
     {
@@ -210,6 +216,7 @@ public class CellularAutomata : GenerationAlgorithm
         return coordsLists;
     }
 
+
     /// <summary>
     /// Given two coordinates on the cellMap, this function starts expanding from that point until reaching a limit of
     /// the cellMap, or encounters cells which are not the same type as the original one. 
@@ -261,8 +268,8 @@ public class CellularAutomata : GenerationAlgorithm
 
 
         RegionDistance[,] distanceMatrix = new RegionDistance[regionsList.Count, regionsList.Count];
-
-        for (int i = 0; i < regionsList.Count; i++)
+       
+        Parallel.For(0, regionsList.Count, i =>
         {
             for (int j = 0; j < regionsList.Count; j++)
             {
@@ -275,8 +282,7 @@ public class CellularAutomata : GenerationAlgorithm
                     distanceMatrix[j, i] = minDistance;
                 }
             }
-        }
-
+        });
         int index = 0;
         List<int> usedIndex = new List<int>();
         while (usedIndex.Count != regionsList.Count - 1)
@@ -552,8 +558,8 @@ public class ScriptEditorCA : Editor
     public override void OnInspectorGUI()
     {
         gizmoDrawing = (CellularAutomata)target;
-        gizmoDrawing.widthMap = EditorGUILayout.IntSlider("Width", gizmoDrawing.widthMap, 0, 300);
-        gizmoDrawing.heightMap = EditorGUILayout.IntSlider("Height", gizmoDrawing.heightMap, 0, 300);
+        gizmoDrawing.widthMap = EditorGUILayout.IntSlider("Width", gizmoDrawing.widthMap, 0, 600);
+        gizmoDrawing.heightMap = EditorGUILayout.IntSlider("Height", gizmoDrawing.heightMap, 0, 600);
         gizmoDrawing.tileSize = EditorGUILayout.IntSlider("Tile Size", gizmoDrawing.tileSize, 1, 100);
         EditorGUILayout.FloatField("Execution time (ms)", gizmoDrawing.executionTime);
         EditorGUILayout.FloatField("Memory Consumption time (ms)", gizmoDrawing.memoryConsumption);

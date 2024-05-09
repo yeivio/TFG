@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 public class RandomWalk : GenerationAlgorithm
 {
@@ -52,7 +53,12 @@ public class RandomWalk : GenerationAlgorithm
             writer.WriteLine(string.Join(";", textoData));
         }
     }
-
+    private void Update()
+    {
+        Profiler.BeginSample("RWMEDIDA");
+        Generate();
+        Profiler.EndSample();
+    }
 
     public override void Generate(int seed = -1)
     {
@@ -142,8 +148,8 @@ public class ScriptEditorRW : Editor
     public override void OnInspectorGUI()
     {
         gizmoDrawing = (RandomWalk)target;
-        gizmoDrawing.widthMap = EditorGUILayout.IntSlider("Width", gizmoDrawing.widthMap, 0, 300);
-        gizmoDrawing.heightMap = EditorGUILayout.IntSlider("Height", gizmoDrawing.heightMap, 0, 300);
+        gizmoDrawing.widthMap = EditorGUILayout.IntSlider("Width", gizmoDrawing.widthMap, 0, 600);
+        gizmoDrawing.heightMap = EditorGUILayout.IntSlider("Height", gizmoDrawing.heightMap, 0, 600);
         gizmoDrawing.tileSize = EditorGUILayout.IntSlider("Tile Size", gizmoDrawing.tileSize, 1, 100);
         
         EditorGUILayout.FloatField("Execution time (ms)", gizmoDrawing.executionTime);

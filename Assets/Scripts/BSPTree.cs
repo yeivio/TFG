@@ -29,6 +29,11 @@ public class BSPTree : GenerationAlgorithm
         }
         for (int i = base.startGridSize; i <= base.endGridSize; i += base.intervalGridSize)
         {
+            Profiler.logFile = "bsp_" + i.ToString();
+            Profiler.enableBinaryLog = true;
+            Profiler.enabled = true;
+            Profiler.maxUsedMemory = 256 * 1024 * 1024;
+
             var totalPruebas = (long)0;
             for (int j = 0; j <= numPruebas; j++)
             {
@@ -43,6 +48,8 @@ public class BSPTree : GenerationAlgorithm
                 //textoData.Add(executionTime.ToString());
             }
             textoData.Add(((long)(totalPruebas / numPruebas)).ToString());
+            Profiler.enabled = false;
+            Profiler.logFile = "";
         }
 
         using (StreamWriter writer = new StreamWriter("BSP.csv"))
@@ -54,9 +61,19 @@ public class BSPTree : GenerationAlgorithm
             writer.WriteLine(string.Join(";", textoData));
         }
     }
+    private void Update()
+    {
+        Profiler.BeginSample("BSPMEDIDA");
+        Generate();
+        Profiler.EndSample();
+    }
     public override void Generate(int seed = -1)
     {
-        Profiler.BeginSample("BSP");
+        Profiler.logFile = "bsp";
+        Profiler.enableBinaryLog = true;
+        Profiler.enabled = true;
+        Profiler.maxUsedMemory = 256 * 1024 * 1024;
+        Profiler.BeginSample("MEDIDA");
         this.seed = seed;
         GenerateSeed(seed);
         map = new CELL_TYPE[widthMap, heightMap];
@@ -76,6 +93,8 @@ public class BSPTree : GenerationAlgorithm
                     map[i,j] = CELL_TYPE.WALL;
         Profiler.EndSample();
 
+        Profiler.logFile = "";
+        Profiler.enabled = false;
     }
     private class RoomNode
     {
@@ -438,8 +457,8 @@ public class ScriptEditorBSP : Editor
     public override void OnInspectorGUI()
     {
         gizmoDrawing = (BSPTree)target;
-        gizmoDrawing.widthMap = EditorGUILayout.IntSlider("Width", gizmoDrawing.widthMap, 0, 300);
-        gizmoDrawing.heightMap = EditorGUILayout.IntSlider("Height", gizmoDrawing.heightMap, 0, 300);
+        gizmoDrawing.widthMap = EditorGUILayout.IntSlider("Width", gizmoDrawing.widthMap, 0, 600);
+        gizmoDrawing.heightMap = EditorGUILayout.IntSlider("Height", gizmoDrawing.heightMap, 0, 600);
         gizmoDrawing.tileSize = EditorGUILayout.IntSlider("Tile Size", gizmoDrawing.tileSize, 1, 100);
         EditorGUILayout.FloatField("Execution time (ms)", gizmoDrawing.executionTime);
         //DrawDefaultInspector(); // Draw all public variables

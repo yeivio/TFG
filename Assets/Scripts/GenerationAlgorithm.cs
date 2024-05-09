@@ -39,7 +39,7 @@ public abstract class GenerationAlgorithm : MonoBehaviour
 
     protected void OnDrawGizmos()
     {
-
+        return;
         if (this.map != null)
         {
             for (int x = 0; x <= widthMap + 1; x++)
