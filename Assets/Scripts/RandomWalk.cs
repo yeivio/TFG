@@ -53,12 +53,12 @@ public class RandomWalk : GenerationAlgorithm
             writer.WriteLine(string.Join(";", textoData));
         }
     }
-    private void Update()
-    {
-        Profiler.BeginSample("RWMEDIDA");
-        Generate();
-        Profiler.EndSample();
-    }
+    //private void Update()
+    //{
+    //    Profiler.BeginSample("RWMEDIDA");
+    //    Generate();
+    //    Profiler.EndSample();
+    //}
 
     public override void Generate(int seed = -1)
     {

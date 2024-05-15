@@ -15,7 +15,7 @@ public abstract class GenerationAlgorithm : MonoBehaviour
     public int seed;
     #endregion
 
-    public CELL_TYPE[,] map;
+    protected CELL_TYPE[,] map;
     public enum CELL_TYPE { NOTHING, WALL, FLOOR, CORRIDOR, DOOR };
 
     public int startGridSize = 50;
@@ -36,10 +36,31 @@ public abstract class GenerationAlgorithm : MonoBehaviour
 
     public abstract void Generate(int seed = -1);
     public int getSeed() { return seed; }
+    public CELL_TYPE[,] getMap() { return this.map; }
+
+    public CELL_TYPE[,] getDrawMap()
+    {
+        CELL_TYPE[,] returnmap = new CELL_TYPE[widthMap + 1, heightMap + 1];
+
+        for (int x = 0; x <= widthMap; x++)
+            for (int y = 0; y <= heightMap ; y++)
+            {
+                if (x == 0 || y == 0 || x >= widthMap || y >= heightMap )
+                {
+                    returnmap[x, y] = CELL_TYPE.WALL;
+                }
+                else
+                {
+                    int i = x - 1;
+                    int j = y - 1;
+                    returnmap[x,y] = map[i, j];
+                }
+            }
+        return returnmap;
+    }
 
     protected void OnDrawGizmos()
     {
-        return;
         if (this.map != null)
         {
             for (int x = 0; x <= widthMap + 1; x++)

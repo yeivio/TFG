@@ -86,8 +86,8 @@ public class CellularAutomata : GenerationAlgorithm
         }
         FilteringProcess(wallSizeThreshold, roomSizeThreshold);
         GenerateCorridors();
-        if (GetAllRegionsOfType(CELL_TYPE.FLOOR).Count > 1)
-            Debug.LogError("CellularAutomata:" + this.seed);
+        //if (GetAllRegionsOfType(CELL_TYPE.FLOOR).Count > 1)
+        //    Debug.LogError("CellularAutomata:" + this.seed);
     }
 
     private void GenerateRandomStart()

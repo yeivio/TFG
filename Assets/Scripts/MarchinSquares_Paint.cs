@@ -5,11 +5,10 @@ using UnityEditor;
 using System.Linq;
 using static GenerationAlgorithm;
 using Unity.VisualScripting;
+using UnityEngine.Profiling;
 
-public class WFC_Paint : GenerationAlgorithm
+public class MarchinSquares_Paint : GenerationAlgorithm
 {
-
-
     // wrong 10 10 0.893 0 2 2 728405002 5 0
     public GenerationAlgorithm baseMap;
     public List<Tiles> usableTiles;
@@ -18,30 +17,45 @@ public class WFC_Paint : GenerationAlgorithm
     private Cell[,] cellMap;   // Map
     private SpriteRenderer[,] tileMaps; // Visual representation of cellMap
 
+    public GameObject prefab;
+
     private int limitBuc;
+
+    private CELL_TYPE[,] drawMap;
+
+    int counter;
+    private void Start()
+    {
+        counter = 0;
+
+    }
+    private void Update()
+    {
+        if (counter < 6)
+            EditorApplication.ExitPlaymode();
+        Generate();
+        counter++;
+    }
 
     public override void Generate(int seed = -1)
     {
+
         limitBuc = 200000;
-        this.widthMap = baseMap.widthMap;
-        this.heightMap = baseMap.heightMap;
+        this.widthMap = baseMap.widthMap + 1;
+        this.heightMap = baseMap.heightMap + 1;
+        drawMap = this.baseMap.getDrawMap();
         tileMaps = new SpriteRenderer[widthMap, heightMap];
         this.seed = seed;
         GenerateSeed(seed);
-
         // Clean prev output
         int childCount = transform.childCount;
         for (int i = 0; i < childCount; i++)
         {
             if (Application.isPlaying)
                 Destroy(this.transform.GetChild(0).gameObject);
-            else
-                DestroyImmediate(this.transform.GetChild(0).gameObject, false);
         }
-
-        this.seed = baseMap.seed;
-        baseMap.Generate(seed);
-
+        Profiler.BeginSample("MSMESURE");
+        var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
         CleanMap();
         while (CheckEnd() && limitBuc > 0)
         {
@@ -79,11 +93,14 @@ public class WFC_Paint : GenerationAlgorithm
             {
                 SpawnTile(j, i);
             }
+        watch.Stop();
+        Debug.Log(watch.ElapsedMilliseconds); // This is in ms
+        Profiler.EndSample();
     }
     private Tiles FilterCellOptions(Cell actualCell)
     {
         //actualCell.options[UnityEngine.Random.Range(0, actualCell.options.Count)]
-        switch (baseMap.map[actualCell.xPos, actualCell.yPos])
+        switch (drawMap[actualCell.xPos, actualCell.yPos])
         {
             case GenerationAlgorithm.CELL_TYPE.FLOOR:
                 actualCell.options.RemoveAll(x => x.cellType != GenerationAlgorithm.CELL_TYPE.FLOOR);
@@ -97,25 +114,25 @@ public class WFC_Paint : GenerationAlgorithm
         if (actualCell.yPos < heightMap - 1)
         {
            // Removing any tile option which doesn't match the celltype on the adyacent position.
-            actualCell.options.RemoveAll(x => !x.TopPosibilities.Any(y => y.cellType == baseMap.map[actualCell.xPos, actualCell.yPos + 1]));
+            actualCell.options.RemoveAll(x => !x.TopPosibilities.Any(y => y.cellType == drawMap[actualCell.xPos, actualCell.yPos + 1]));
         }
 
         // Check bottom
         if (actualCell.yPos > 0 )
         {
-            actualCell.options.RemoveAll(x => !x.BottomPosibilities.Any(y => y.cellType == baseMap.map[actualCell.xPos, actualCell.yPos - 1]));
+            actualCell.options.RemoveAll(x => !x.BottomPosibilities.Any(y => y.cellType == drawMap[actualCell.xPos, actualCell.yPos - 1]));
         }
 
         // Check left
         if (actualCell.xPos > 0 )
         {
-            actualCell.options.RemoveAll(x => !x.LeftPosibilities.Any(y => y.cellType == baseMap.map[actualCell.xPos - 1, actualCell.yPos]));
+            actualCell.options.RemoveAll(x => !x.LeftPosibilities.Any(y => y.cellType == drawMap[actualCell.xPos - 1, actualCell.yPos]));
         }
 
         // Check right
         if (actualCell.xPos < widthMap - 1)
         {
-            actualCell.options.RemoveAll(x => !x.RightPosibilities.Any(y => y.cellType == baseMap.map[actualCell.xPos + 1, actualCell.yPos]));
+            actualCell.options.RemoveAll(x => !x.RightPosibilities.Any(y => y.cellType == drawMap[actualCell.xPos + 1, actualCell.yPos]));
         }
 
 
@@ -124,25 +141,25 @@ public class WFC_Paint : GenerationAlgorithm
         // Check right-top
         if (actualCell.xPos < widthMap - 1 && actualCell.yPos < heightMap - 1)
         {
-            actualCell.options.RemoveAll(x => !x.TopRightPosibilities.Any(y => y.cellType == baseMap.map[actualCell.xPos + 1, actualCell.yPos + 1]));
+            actualCell.options.RemoveAll(x => !x.TopRightPosibilities.Any(y => y.cellType == drawMap[actualCell.xPos + 1, actualCell.yPos + 1]));
         }
         
         // Check left-top
         if (actualCell.xPos > 0 && actualCell.yPos < heightMap - 1)
         {
-            actualCell.options.RemoveAll(x => !x.TopLeftDiagonalPosibilities.Any(y => y.cellType == baseMap.map[actualCell.xPos - 1 , actualCell.yPos + 1]));
+            actualCell.options.RemoveAll(x => !x.TopLeftDiagonalPosibilities.Any(y => y.cellType == drawMap[actualCell.xPos - 1 , actualCell.yPos + 1]));
         }
 
         // Check right-bottom
         if (actualCell.xPos < widthMap - 1 && actualCell.yPos > 0)
         {
-            actualCell.options.RemoveAll(x => !x.BottomRightPosibilities.Any(y => y.cellType == baseMap.map[actualCell.xPos + 1, actualCell.yPos - 1]));
+            actualCell.options.RemoveAll(x => !x.BottomRightPosibilities.Any(y => y.cellType == drawMap[actualCell.xPos + 1, actualCell.yPos - 1]));
         }
         
         // Check left-bottom
         if (actualCell.xPos > 0 && actualCell.yPos > 0)
         {
-            actualCell.options.RemoveAll(x => !x.BottomLeftPosibilities.Any(y => y.cellType == baseMap.map[actualCell.xPos - 1 , actualCell.yPos - 1]));
+            actualCell.options.RemoveAll(x => !x.BottomLeftPosibilities.Any(y => y.cellType == drawMap[actualCell.xPos - 1 , actualCell.yPos - 1]));
         }
 
 
@@ -161,7 +178,7 @@ public class WFC_Paint : GenerationAlgorithm
                 //Right
                 if (actualCell.xPos + 1 >= widthMap && tile.RightPosibilities.Any(x => x.cellType == CELL_TYPE.FLOOR)
                     ||
-                    actualCell.xPos < widthMap - 1 && tile.RightPosibilities.Any(x => x.cellType != baseMap.map[actualCell.xPos + 1, actualCell.yPos]))
+                    actualCell.xPos < widthMap - 1 && tile.RightPosibilities.Any(x => x.cellType != drawMap[actualCell.xPos + 1, actualCell.yPos]))
                 {
                     tileProb--;
                 }
@@ -169,14 +186,14 @@ public class WFC_Paint : GenerationAlgorithm
                 // top
                 if (actualCell.yPos + 1 >= heightMap && tile.TopPosibilities.Any(x => x.cellType == CELL_TYPE.FLOOR)
                     ||
-                    actualCell.yPos < heightMap - 1 && tile.TopPosibilities.Any(x => x.cellType != baseMap.map[actualCell.xPos, actualCell.yPos + 1]))
+                    actualCell.yPos < heightMap - 1 && tile.TopPosibilities.Any(x => x.cellType != drawMap[actualCell.xPos, actualCell.yPos + 1]))
                 {
                     tileProb--;
                 }
                 // Left
                 if (actualCell.xPos - 1 < 0 && tile.LeftPosibilities.Any(x => x.cellType == CELL_TYPE.FLOOR)
                     ||
-                    actualCell.xPos > 0 && tile.LeftPosibilities.Any(x => x.cellType != baseMap.map[actualCell.xPos - 1, actualCell.yPos]))
+                    actualCell.xPos > 0 && tile.LeftPosibilities.Any(x => x.cellType != drawMap[actualCell.xPos - 1, actualCell.yPos]))
                 {
                     tileProb--;
                 }
@@ -184,7 +201,7 @@ public class WFC_Paint : GenerationAlgorithm
                 //Bottom
                 if (actualCell.yPos - 1 < 0 && tile.BottomPosibilities.Any(x => x.cellType == CELL_TYPE.FLOOR)
                     ||
-                    actualCell.yPos > 0 && tile.BottomPosibilities.Any(x => x.cellType != baseMap.map[actualCell.xPos, actualCell.yPos - 1]))
+                    actualCell.yPos > 0 && tile.BottomPosibilities.Any(x => x.cellType != drawMap[actualCell.xPos, actualCell.yPos - 1]))
                 {
                     tileProb--;
                 }
@@ -192,7 +209,7 @@ public class WFC_Paint : GenerationAlgorithm
                 //Bottom-Right
                 if((actualCell.yPos - 1 < 0 || actualCell.xPos + 1 >= widthMap) && tile.BottomRightPosibilities.Any(x => x.cellType == CELL_TYPE.FLOOR) 
                     ||
-                    actualCell.yPos > 0 && actualCell.xPos < widthMap - 1 && tile.BottomRightPosibilities.Any(x => x.cellType != baseMap.map[actualCell.xPos + 1, actualCell.yPos - 1]))
+                    actualCell.yPos > 0 && actualCell.xPos < widthMap - 1 && tile.BottomRightPosibilities.Any(x => x.cellType != drawMap[actualCell.xPos + 1, actualCell.yPos - 1]))
                 {
                     tileProb--;
                 }
@@ -200,7 +217,7 @@ public class WFC_Paint : GenerationAlgorithm
                 //Bottom-Left
                 if ((actualCell.yPos - 1 < 0 || actualCell.xPos - 1 < 0) && tile.BottomLeftPosibilities.Any(x => x.cellType == CELL_TYPE.FLOOR)
                     ||
-                    actualCell.yPos > 0 && actualCell.xPos > 0 && tile.BottomLeftPosibilities.Any(x => x.cellType != baseMap.map[actualCell.xPos - 1, actualCell.yPos - 1]))
+                    actualCell.yPos > 0 && actualCell.xPos > 0 && tile.BottomLeftPosibilities.Any(x => x.cellType != drawMap[actualCell.xPos - 1, actualCell.yPos - 1]))
                 {
                     tileProb--;
                 }
@@ -208,7 +225,7 @@ public class WFC_Paint : GenerationAlgorithm
                 //Top-Right
                 if ((actualCell.yPos + 1 >= heightMap || actualCell.xPos + 1 >= widthMap) && tile.TopRightPosibilities.Any(x => x.cellType == CELL_TYPE.FLOOR)
                     ||
-                    actualCell.yPos < heightMap - 1 && actualCell.xPos < widthMap - 1 && tile.TopRightPosibilities.Any(x => x.cellType != baseMap.map[actualCell.xPos + 1, actualCell.yPos + 1]))
+                    actualCell.yPos < heightMap - 1 && actualCell.xPos < widthMap - 1 && tile.TopRightPosibilities.Any(x => x.cellType != drawMap[actualCell.xPos + 1, actualCell.yPos + 1]))
                 {
                     tileProb--;
                 }
@@ -216,7 +233,7 @@ public class WFC_Paint : GenerationAlgorithm
                 //Top-Left
                 if ((actualCell.yPos + 1 >= heightMap || actualCell.xPos - 1 < 0) && tile.TopLeftDiagonalPosibilities.Any(x => x.cellType == CELL_TYPE.FLOOR)
                     ||
-                     actualCell.yPos < heightMap - 1 && actualCell.xPos > 0 && tile.TopLeftDiagonalPosibilities.Any(x => x.cellType != baseMap.map[actualCell.xPos - 1, actualCell.yPos + 1]))
+                     actualCell.yPos < heightMap - 1 && actualCell.xPos > 0 && tile.TopLeftDiagonalPosibilities.Any(x => x.cellType != drawMap[actualCell.xPos - 1, actualCell.yPos + 1]))
                 {
                     tileProb--;
                 }
@@ -261,16 +278,20 @@ public class WFC_Paint : GenerationAlgorithm
     }
     public void SpawnTile(int x, int y)
     {
-        GameObject aux = new GameObject().gameObject;
+        if (!Application.isPlaying)
+            return;
+        //GameObject aux = new GameObject().gameObject;
+        GameObject aux = Instantiate(prefab);
         try
         {
-            aux.AddComponent<SpriteRenderer>().sprite = cellMap[x, y].options[0].GetComponent<SpriteRenderer>().sprite;
+            aux.GetComponent<SpriteRenderer>().sprite = cellMap[x, y].options[0].GetComponent<SpriteRenderer>().sprite;
             tileMaps[x, y] = aux.GetComponent<SpriteRenderer>();
         }
         catch (Exception)
         {
             Debug.Log("Error");
         }
+
         aux.transform.parent = this.transform;
         aux.gameObject.transform.position = new Vector3(x+0.5f, y+0.5f, 0);
     }
@@ -334,7 +355,7 @@ public class WFC_Paint : GenerationAlgorithm
                 {
                     contador++; // Out of bounds count as walls
                 }
-                else if (baseMap.map[casillaX, casillaY] == CELL_TYPE.WALL)
+                else if (drawMap[casillaX, casillaY] == CELL_TYPE.WALL)
                 {
                     contador++;
                 }
@@ -348,7 +369,7 @@ public class WFC_Paint : GenerationAlgorithm
         {
             for (int j = 0; j < heightMap; j++)
             {
-                cellMap[i, j] = new Cell(usableTiles, i, j, baseMap.map[i,j]);
+                cellMap[i, j] = new Cell(usableTiles, i, j, drawMap[i,j]);
             }
         }
     }
@@ -775,14 +796,14 @@ public class WFC_Paint : GenerationAlgorithm
 
 # region GizmoEditor
 #if UNITY_EDITOR
-[CustomEditor(typeof(WFC_Paint))]
+[CustomEditor(typeof(MarchinSquares_Paint))]
 public class ScriptEditorWFC_Paint : Editor
 {
-    private WFC_Paint gizmoDrawing;
+    private MarchinSquares_Paint gizmoDrawing;
 
     public override void OnInspectorGUI()
     {
-        gizmoDrawing = (WFC_Paint)target;
+        gizmoDrawing = (MarchinSquares_Paint)target;
         //DrawDefaultInspector(); // Draw all public variables
         EditorGUILayout.Space();
 
@@ -790,13 +811,15 @@ public class ScriptEditorWFC_Paint : Editor
         EditorGUILayout.PropertyField(serializedObject.FindProperty("usableTiles"), new GUIContent("Sprite"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("DefaultTile"), new GUIContent("Sprite Default"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("ErrorTile"), new GUIContent("Sprite Error"));
-        gizmoDrawing.seed = EditorGUILayout.IntField("Seed", gizmoDrawing.seed);
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("prefab"), new GUIContent("Prefab"));
+        //gizmoDrawing.seed = EditorGUILayout.IntField("Seed", gizmoDrawing.seed);
 
-        if (GUILayout.Button("Paint"))
+        if (GUILayout.Button("Rnadom Paint"))
         {
             gizmoDrawing.Generate();
 
         }
+        /*
         if (GUILayout.Button("Verify tile rules"))
         {
             gizmoDrawing.TileVerifier();
@@ -822,7 +845,7 @@ public class ScriptEditorWFC_Paint : Editor
                 PrefabUtility.RecordPrefabInstancePropertyModifications(til);
             }
 
-        }
+        }*/
         serializedObject.ApplyModifiedProperties();
         if (GUI.changed)
             UnityEditorInternal.InternalEditorUtility.RepaintAllViews();

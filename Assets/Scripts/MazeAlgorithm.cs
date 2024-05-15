@@ -1,21 +1,17 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Profiling;
+
 
 // 2 3 1528892033
 public class MazeAlgorithm : GenerationAlgorithm
 {
     private Cell[,] cellMap; // True is Used, False is not Used
     public List<Tiles> usableTiles;
-    long currentExploredNumber = 0;
-
+    private long currentExploredNumber = 0;
+    public GameObject prefab;
     public void DataMeassure(int seed = -1)
     {
         base.startGridSize = 50;
@@ -35,9 +31,18 @@ public class MazeAlgorithm : GenerationAlgorithm
             {
                 this.widthMap = i;
                 this.heightMap = i;
-
-                var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
                 this.Generate(seed);
+                var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
+                //Profiler.BeginSample("MAZEMEDIDA");
+                for (int p = 0; p < heightMap; p++)
+                    for (int q = 0; q < widthMap; q++)
+                    {
+                        if (cellMap[q, p].IsVisited())
+                        {
+                            SpawnTile(q, p);
+                        }
+                    }
+                //Profiler.EndSample();
                 watch.Stop();
                 totalPruebas += watch.ElapsedMilliseconds; // This is in ms
                 //textoData.Add(executionTime.ToString());
@@ -45,9 +50,9 @@ public class MazeAlgorithm : GenerationAlgorithm
             textoData.Add(((long)(totalPruebas / numPruebas)).ToString());
         }
 
-        using (StreamWriter writer = new StreamWriter("MZ.csv"))
+        using (StreamWriter writer = new StreamWriter("MZ_Painting.csv"))
         {
-            // Escribir la primera fila con los números
+            // Escribir la primera fila con los nï¿½meros
             writer.WriteLine(string.Join(";", textoCabecera));
 
             // Escribir la segunda fila con los valores
@@ -55,22 +60,14 @@ public class MazeAlgorithm : GenerationAlgorithm
         }
     }
 
-
-    private void Update()
-    {
-        Profiler.BeginSample("MAZEMEDIDA");
-        Generate();
-        Profiler.EndSample();
-    }
-
     public override void Generate(int seed = -1)
     {
-        // Clean prev output
-        //int childCount = transform.childCount;
-        //for (int i = 0; i < childCount; i++)
-        //{
-        //    Destroy(this.transform.GetChild(i).gameObject);
-        //}
+        //Clean prev output
+        int childCount = transform.childCount;
+        for (int i = 0; i < childCount; i++)
+        {
+            Destroy(this.transform.GetChild(i).gameObject);
+        }
 
 
         this.seed = seed;
@@ -83,6 +80,7 @@ public class MazeAlgorithm : GenerationAlgorithm
                 cellMap[i, j] = new Cell();
             }
         }
+        UnityEngine.Profiling.Profiler.BeginSample("MAZEMEDIDA");
         int startingX = UnityEngine.Random.Range(0, widthMap);
         int startingY = UnityEngine.Random.Range(0, heightMap);
         long maxCellNumber = widthMap * heightMap;
@@ -99,25 +97,33 @@ public class MazeAlgorithm : GenerationAlgorithm
             startingX = aux.x;
             startingY = aux.y;
         }
+        UnityEngine.Profiling.Profiler.EndSample();
+        UnityEngine.Profiling.Profiler.BeginSample("MAZEMEDIDA");
+        var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
+        for (int p = 0; p < heightMap; p++)
+            for (int q = 0; q < widthMap; q++)
+            {
+                if (cellMap[q, p].IsVisited())
+                {
+                    SpawnTile(q, p);
+                }
+            }
 
-        //if (Application.isPlaying)
-        //{
-        //    for (int i = 0; i < heightMap; i++)
-        //        for (int j = 0; j < widthMap; j++)
-        //        {
-        //            if (cellMap[j, i].IsVisited())
-        //            {
-        //                SpawnTile(j, i);
-        //            }
-        //        }
-        //}
+        watch.Stop();
+        UnityEngine.Profiling.Profiler.EndSample();
+        Debug.Log(watch.ElapsedMilliseconds);
     }
+
+    //private void Update()
+    //{
+    //    Generate();
+    //}
 
     public void SpawnTile(int x, int y)
     {
         Cell celda = cellMap[x, y];
-        List<Tiles> options = new List<Tiles>(usableTiles);
-        foreach(Tiles tile in new List<Tiles>(options))
+        List<Tiles> options = new List<Tiles>() ;
+        foreach(Tiles tile in new List<Tiles>(usableTiles))
         {
             
             if (tile.isLeftConnected && !celda.HasConnection(Cell.ORIENTATION.LEFT) ||
@@ -125,8 +131,9 @@ public class MazeAlgorithm : GenerationAlgorithm
                 tile.isTopConnected && !celda.HasConnection(Cell.ORIENTATION.UP) ||
                 tile.isBottomConnected && !celda.HasConnection(Cell.ORIENTATION.DOWN))
             {
-                // Las tile tiene una o más orientaciones que no coinciden
-                options.Remove(tile);
+                // Las tile tiene una o mï¿½s orientaciones que no coinciden
+                //options.Remove(tile);
+                continue;
             }
 
             if (!tile.isLeftConnected && celda.HasConnection(Cell.ORIENTATION.LEFT) ||
@@ -135,23 +142,29 @@ public class MazeAlgorithm : GenerationAlgorithm
                 !tile.isBottomConnected && celda.HasConnection(Cell.ORIENTATION.DOWN))
             {
                 //Las tiles no tienen absolutamente todas las coincidencias
-                options.Remove(tile);
+                //options.Remove(tile);
+                continue;
             }
 
+            options.Add(tile);
+
         }
-        
+
         int num = UnityEngine.Random.Range(0, options.Count);
-        GameObject aux = new GameObject().gameObject;
+        //GameObject aux = new GameObject().gameObject;
+        GameObject aux;
         try
         {
-            aux.AddComponent<SpriteRenderer>().sprite = options[num].GetComponent<SpriteRenderer>().sprite;
+            aux = Instantiate(prefab);
+            aux.GetComponent<SpriteRenderer>().sprite = options[num].GetComponent<SpriteRenderer>().sprite;
+            aux.transform.parent = this.transform;
+            aux.gameObject.transform.position = new Vector3(x, y, 0);
+            //aux.AddComponent<SpriteRenderer>().sprite = options[num].GetComponent<SpriteRenderer>().sprite;
         }
         catch (Exception)
         {
             Debug.Log("Seed:" + seed);
         }
-        aux.transform.parent = this.transform;
-        aux.gameObject.transform.position = new Vector3(x, y, 0);
     }
 
     public void kill(int x, int y)
@@ -393,7 +406,7 @@ public class ScriptEditorMaze : Editor
         EditorGUILayout.Space();
         gizmoDrawing.seed = EditorGUILayout.IntField("Seed", gizmoDrawing.seed);
         EditorGUILayout.PropertyField(serializedObject.FindProperty("usableTiles"), new GUIContent("Sprite"));
-
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("prefab"), new GUIContent("prefab"));
         if (GUILayout.Button("Generate cellular automata"))
         {
             gizmoDrawing.Generate(gizmoDrawing.seed);
