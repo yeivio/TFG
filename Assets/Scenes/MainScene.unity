@@ -771,7 +771,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &560063858
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -784,16 +784,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83f1e4c8192e6af4ebcfef9c32c175db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  widthMap: 100
-  heightMap: 100
+  widthMap: 5
+  heightMap: 5
   tileSize: 1
   executionTime: 0
   memoryConsumption: 0
-  seed: 1278962874
+  seed: -309226383
   startGridSize: 50
   endGridSize: 600
   intervalGridSize: 50
-  threshold: 100
+  threshold: 41
   numMaxPasos: 1000
   numMaxAgentes: 7
 --- !u!4 &560063859
@@ -899,7 +899,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &625730274
 Transform:
   m_ObjectHideFlags: 0
@@ -982,12 +982,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b165e9d48da5e447a0f5b14793116aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  widthMap: 50
-  heightMap: 50
+  widthMap: 10
+  heightMap: 10
   tileSize: 1
   executionTime: 40
   memoryConsumption: 0
-  seed: -707234259
+  seed: -585312336
   startGridSize: 50
   endGridSize: 350
   intervalGridSize: 50
@@ -1220,6 +1220,7 @@ MonoBehaviour:
   ErrorTile: {fileID: 2282911249071735717, guid: 10ab23332b7d2704fad3be90f2d1d2c1,
     type: 3}
   prefab: {fileID: 1821367709785888664, guid: 3a73dc700b74b9f4d89784312998d4b0, type: 3}
+  enabled3d: 0
 --- !u!1001 &969001003
 PrefabInstance:
   m_ObjectHideFlags: 0

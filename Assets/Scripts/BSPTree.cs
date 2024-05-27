@@ -61,12 +61,12 @@ public class BSPTree : GenerationAlgorithm
             writer.WriteLine(string.Join(";", textoData));
         }
     }
-    private void Update()
-    {
-        Profiler.BeginSample("BSPMEDIDA");
-        Generate();
-        Profiler.EndSample();
-    }
+    //private void Update()
+    //{
+    //    Profiler.BeginSample("BSPMEDIDA");
+    //    Generate();
+    //    Profiler.EndSample();
+    //}
     public override void Generate(int seed = -1)
     {
         Profiler.logFile = "bsp";

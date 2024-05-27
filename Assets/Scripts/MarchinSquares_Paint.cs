@@ -20,6 +20,7 @@ public class MarchinSquares_Paint : GenerationAlgorithm
     public GameObject prefab;
 
     private int limitBuc;
+    public bool enabled3d;
 
     private CELL_TYPE[,] drawMap;
 
@@ -29,21 +30,23 @@ public class MarchinSquares_Paint : GenerationAlgorithm
         counter = 0;
 
     }
-    private void Update()
-    {
-        if (counter < 6)
-            EditorApplication.ExitPlaymode();
-        Generate();
-        counter++;
-    }
+    //private void Update()
+    //{
+    //    if (counter < 6)
+    //        EditorApplication.ExitPlaymode();
+    //    Generate();
+    //    counter++;
+    //}
 
     public override void Generate(int seed = -1)
     {
 
         limitBuc = 200000;
-        this.widthMap = baseMap.widthMap + 1;
-        this.heightMap = baseMap.heightMap + 1;
+
         drawMap = this.baseMap.getDrawMap();
+        this.widthMap = drawMap.GetLength(0);
+        this.heightMap = drawMap.GetLength(1);
+
         tileMaps = new SpriteRenderer[widthMap, heightMap];
         this.seed = seed;
         GenerateSeed(seed);
@@ -91,7 +94,10 @@ public class MarchinSquares_Paint : GenerationAlgorithm
         for (int i = 0; i < heightMap; i++)
             for (int j = 0; j < widthMap; j++)
             {
-                SpawnTile(j, i);
+                if (enabled3d)
+                    SpawnObject(j, i);
+                else
+                    SpawnTile(j, i);
             }
         watch.Stop();
         Debug.Log(watch.ElapsedMilliseconds); // This is in ms
@@ -294,6 +300,25 @@ public class MarchinSquares_Paint : GenerationAlgorithm
 
         aux.transform.parent = this.transform;
         aux.gameObject.transform.position = new Vector3(x+0.5f, y+0.5f, 0);
+    }
+
+    public void SpawnObject(int x, int y)
+    {
+        if (!Application.isPlaying)
+            return;
+        try
+        {
+            GameObject aux = Instantiate(cellMap[x, y].options[0].MODEL_3D);
+            aux.transform.parent = this.transform;
+            aux.gameObject.transform.position = new Vector3(x + 0.5f, y + 0.5f, 0);
+            aux.gameObject.transform.rotation = Quaternion.Euler(-90f, 0, 0);
+        }
+        catch (Exception e)
+        {
+            Debug.Log("Error Spawneando Objeto" + e);
+        }
+
+        
     }
     public bool CheckEnd()
     {
@@ -812,6 +837,7 @@ public class ScriptEditorWFC_Paint : Editor
         EditorGUILayout.PropertyField(serializedObject.FindProperty("DefaultTile"), new GUIContent("Sprite Default"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("ErrorTile"), new GUIContent("Sprite Error"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("prefab"), new GUIContent("Prefab"));
+        gizmoDrawing.enabled3d = EditorGUILayout.Toggle("Generar mapa en 3D", gizmoDrawing.enabled3d);
         //gizmoDrawing.seed = EditorGUILayout.IntField("Seed", gizmoDrawing.seed);
 
         if (GUILayout.Button("Rnadom Paint"))

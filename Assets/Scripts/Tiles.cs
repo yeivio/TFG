@@ -21,5 +21,8 @@ public class Tiles : MonoBehaviour
     public bool isTopConnected;
 
     [Header("WSP-Paint")]
+    public GameObject MODEL_3D;
+
+    [Header("WSP-Paint")]
     public GenerationAlgorithm.CELL_TYPE cellType;
 }

@@ -40,22 +40,27 @@ public abstract class GenerationAlgorithm : MonoBehaviour
 
     public CELL_TYPE[,] getDrawMap()
     {
-        CELL_TYPE[,] returnmap = new CELL_TYPE[widthMap + 1, heightMap + 1];
+        CELL_TYPE[,] returnmap = new CELL_TYPE[widthMap + 2, heightMap + 2];
 
-        for (int x = 0; x <= widthMap; x++)
-            for (int y = 0; y <= heightMap ; y++)
+        for (int x = 0; x < widthMap + 2; x++)
+            for (int y = 0; y < heightMap + 2; y++)
             {
-                if (x == 0 || y == 0 || x >= widthMap || y >= heightMap )
+                
+                if (x == 0 || y == 0 || x == widthMap + 1 || y == heightMap + 1)
                 {
-                    returnmap[x, y] = CELL_TYPE.WALL;
+                    UnityEngine.Debug.Log("1:" + x + "," + y);
+                    returnmap[x,y] = CELL_TYPE.WALL;
                 }
                 else
                 {
+                    UnityEngine.Debug.Log("2:" + x + "," + y);
                     int i = x - 1;
                     int j = y - 1;
-                    returnmap[x,y] = map[i, j];
+                    UnityEngine.Debug.Log("map:" + i + "," + j);
+                    returnmap[x, y] = map[i, j];
                 }
             }
+
         return returnmap;
     }
 

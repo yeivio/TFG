@@ -116,6 +116,8 @@ MonoBehaviour:
   isRightConnected: 0
   isBottomConnected: 0
   isTopConnected: 0
+  MODEL_3D: {fileID: 1079372119876865783, guid: 0608a5a97073f3e4dbb34c07edf36192,
+    type: 3}
   cellType: 1
 --- !u!212 &4844774854346122765
 SpriteRenderer:
