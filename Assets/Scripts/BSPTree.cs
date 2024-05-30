@@ -463,7 +463,6 @@ public class ScriptEditorBSP : Editor
         EditorGUILayout.FloatField("Execution time (ms)", gizmoDrawing.executionTime);
         //DrawDefaultInspector(); // Draw all public variables
         EditorGUILayout.Space();
-        gizmoDrawing.seed = EditorGUILayout.IntField("Seed", gizmoDrawing.seed);
 
         gizmoDrawing.min_room_width = EditorGUILayout.IntField("Min Room Width", gizmoDrawing.min_room_width);
         gizmoDrawing.max_room_width = EditorGUILayout.IntField("Max Room Width", gizmoDrawing.max_room_width);
@@ -481,10 +480,10 @@ public class ScriptEditorBSP : Editor
         {
             gizmoDrawing.Generate();
         }
-        if (GUILayout.Button("MeassureTime"))
-        {
-            gizmoDrawing.DataMeassure();
-        }
+        //if (GUILayout.Button("MeassureTime"))
+        //{
+        //    gizmoDrawing.DataMeassure();
+        //}
 
         if (GUI.changed)
             UnityEditorInternal.InternalEditorUtility.RepaintAllViews();

@@ -54,8 +54,16 @@ public class MarchinSquares_Paint : GenerationAlgorithm
         int childCount = transform.childCount;
         for (int i = 0; i < childCount; i++)
         {
-            if (Application.isPlaying)
-                Destroy(this.transform.GetChild(0).gameObject);
+            #if UNITY_EDITOR
+            if (!Application.isPlaying)
+            {
+                GameObject.DestroyImmediate(this.transform.GetChild(0).gameObject);
+            }
+            else
+            #endif
+            {
+                GameObject.Destroy(this.transform.GetChild(0).gameObject);
+            };
         }
         Profiler.BeginSample("MSMESURE");
         var watch = System.Diagnostics.Stopwatch.StartNew();    // Start meassuring time
@@ -284,8 +292,8 @@ public class MarchinSquares_Paint : GenerationAlgorithm
     }
     public void SpawnTile(int x, int y)
     {
-        if (!Application.isPlaying)
-            return;
+        //if (!Application.isPlaying)
+        //    return;
         //GameObject aux = new GameObject().gameObject;
         GameObject aux = Instantiate(prefab);
         try
@@ -304,8 +312,8 @@ public class MarchinSquares_Paint : GenerationAlgorithm
 
     public void SpawnObject(int x, int y)
     {
-        if (!Application.isPlaying)
-            return;
+        //if (!Application.isPlaying)
+        //    return;
         try
         {
             GameObject aux = Instantiate(cellMap[x, y].options[0].MODEL_3D);
@@ -840,7 +848,7 @@ public class ScriptEditorWFC_Paint : Editor
         gizmoDrawing.enabled3d = EditorGUILayout.Toggle("Generar mapa en 3D", gizmoDrawing.enabled3d);
         //gizmoDrawing.seed = EditorGUILayout.IntField("Seed", gizmoDrawing.seed);
 
-        if (GUILayout.Button("Rnadom Paint"))
+        if (GUILayout.Button("Random Paint"))
         {
             gizmoDrawing.Generate();
 

@@ -170,10 +170,10 @@ public class ScriptEditorRW : Editor
         {
             gizmoDrawing.Generate();
         }
-        if (GUILayout.Button("MeassureTime"))
-        {
-            gizmoDrawing.DataMeassure();
-        }
+        //if (GUILayout.Button("MeassureTime"))
+        //{
+        //    gizmoDrawing.DataMeassure();
+        //}
 
         if (GUI.changed)
             UnityEditorInternal.InternalEditorUtility.RepaintAllViews();

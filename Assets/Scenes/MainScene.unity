@@ -627,60 +627,6 @@ MonoBehaviour:
     mipBias: 0
     varianceClampScale: 0.9
     contrastAdaptiveSharpening: 0
---- !u!1 &437006881
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 437006884}
-  - component: {fileID: 437006882}
-  m_Layer: 0
-  m_Name: RandomWalk_Pure
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &437006882
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 437006881}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 86c858cfc9e0265499e1025e573dbfd8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  widthMap: 100
-  heightMap: 100
-  tileSize: 1
-  executionTime: 0
-  memoryConsumption: 0
-  seed: -1279506921
-  startGridSize: 0
-  endGridSize: 0
-  intervalGridSize: 0
-  threshold: 23
---- !u!4 &437006884
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 437006881}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &477228360
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -771,7 +717,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &560063858
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -789,7 +735,7 @@ MonoBehaviour:
   tileSize: 1
   executionTime: 0
   memoryConsumption: 0
-  seed: -309226383
+  seed: -714965474
   startGridSize: 50
   endGridSize: 600
   intervalGridSize: 50
@@ -811,78 +757,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &625384077
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 625384078}
-  - component: {fileID: 625384079}
-  m_Layer: 0
-  m_Name: Wave Function Collapse
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &625384078
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 625384077}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 23.73035, y: 19.2629, z: 43.070522}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &625384079
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 625384077}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5efc36396e0f4db4b826f53eba377966, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  widthMap: 33
-  heightMap: 54
-  tileSize: 1
-  executionTime: 0
-  memoryConsumption: 0
-  seed: 0
-  startGridSize: 0
-  endGridSize: 0
-  intervalGridSize: 0
-  usableTiles:
-  - {fileID: 6908105143622699393, guid: 19121c40fff4e6f49a38fa5f45bc0198, type: 3}
-  - {fileID: 481551587826182200, guid: 151ede3256997384d91a8e26ba8ffed0, type: 3}
-  - {fileID: -985284377366289241, guid: 7293f6fc7f42d8b4d96106aa6d9092db, type: 3}
-  - {fileID: -312012828959519883, guid: 9e905008b01de3a4f80b2987130a050e, type: 3}
-  - {fileID: 2010700526583109283, guid: 893d375e24e0f354b8fc089b552680ec, type: 3}
-  - {fileID: -604170607812809708, guid: bc08605bd34f254428c3f6e2cedb1cca, type: 3}
-  - {fileID: 295492237392984696, guid: 98074479e660cdb4e9d0a0cac6c81306, type: 3}
-  - {fileID: -6471471138752177162, guid: cbfca4f0575189c479ba786730dc7222, type: 3}
-  - {fileID: 1859095157587662184, guid: f981d2cb681f4ad45a48cd162bc8e237, type: 3}
-  - {fileID: -9156537897187866841, guid: e4cb1a9a3cef8ae4ca715cd2aae7105a, type: 3}
-  - {fileID: 3243867846889016732, guid: 7e825ed33fa45144e821355544fb7787, type: 3}
-  - {fileID: -4378381675446566067, guid: b7e6f759a348bd34c95da83812e61a64, type: 3}
-  - {fileID: 3584676297079117778, guid: ac13488e2c8c204498874653e671df63, type: 3}
-  - {fileID: -5257880468722782078, guid: 89c0223fae1e3c6469e5ee9d1b778c97, type: 3}
-  - {fileID: -7456896534610353609, guid: 3629e9806687f1c498077ce146147963, type: 3}
-  - {fileID: -1276237396861887320, guid: 16c2286b922aaec4b86caebf01dac29a, type: 3}
-  DefaultTile: {fileID: -1276237396861887320, guid: 16c2286b922aaec4b86caebf01dac29a,
-    type: 3}
 --- !u!1 &625730272
 GameObject:
   m_ObjectHideFlags: 0
@@ -1159,7 +1033,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &923939320
 Transform:
   m_ObjectHideFlags: 0
@@ -1187,12 +1061,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc1d169cf578de8428d18716f677cadf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  widthMap: 100
-  heightMap: 100
+  widthMap: 7
+  heightMap: 7
   tileSize: 0
   executionTime: 0
   memoryConsumption: 0
-  seed: 665690340
+  seed: -656031757
   startGridSize: 0
   endGridSize: 0
   intervalGridSize: 0
@@ -1220,7 +1094,7 @@ MonoBehaviour:
   ErrorTile: {fileID: 2282911249071735717, guid: 10ab23332b7d2704fad3be90f2d1d2c1,
     type: 3}
   prefab: {fileID: 1821367709785888664, guid: 3a73dc700b74b9f4d89784312998d4b0, type: 3}
-  enabled3d: 0
+  enabled3d: 1
 --- !u!1001 &969001003
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2016,9 +1890,7 @@ SceneRoots:
   - {fileID: 330585546}
   - {fileID: 719744467}
   - {fileID: 560063859}
-  - {fileID: 437006884}
   - {fileID: 777530354}
   - {fileID: 625730274}
-  - {fileID: 625384078}
   - {fileID: 923939320}
   - {fileID: 1313124176}

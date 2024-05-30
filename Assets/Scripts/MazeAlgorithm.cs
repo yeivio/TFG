@@ -418,10 +418,10 @@ public class ScriptEditorMaze : Editor
             gizmoDrawing.Generate();
         }
 
-        if (GUILayout.Button("Meassure"))
-        {
-            gizmoDrawing.DataMeassure();
-        }
+        //if (GUILayout.Button("Meassure"))
+        //{
+        //    gizmoDrawing.DataMeassure();
+        //}
         serializedObject.ApplyModifiedProperties();
         if (GUI.changed)
             UnityEditorInternal.InternalEditorUtility.RepaintAllViews();

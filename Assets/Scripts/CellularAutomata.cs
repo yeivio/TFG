@@ -66,12 +66,12 @@ public class CellularAutomata : GenerationAlgorithm
         }
     }
 
-    private void Update()
-    {
-        Profiler.BeginSample("CEMEDIDA");
-        Generate();
-        Profiler.EndSample();
-    }
+    //private void Update()
+    //{
+    //    Profiler.BeginSample("CEMEDIDA");
+    //    Generate();
+    //    Profiler.EndSample();
+    //}
 
     public override void Generate(int seed = -1)
     {
@@ -562,7 +562,7 @@ public class ScriptEditorCA : Editor
         gizmoDrawing.heightMap = EditorGUILayout.IntSlider("Height", gizmoDrawing.heightMap, 0, 600);
         gizmoDrawing.tileSize = EditorGUILayout.IntSlider("Tile Size", gizmoDrawing.tileSize, 1, 100);
         EditorGUILayout.FloatField("Execution time (ms)", gizmoDrawing.executionTime);
-        EditorGUILayout.FloatField("Memory Consumption time (ms)", gizmoDrawing.memoryConsumption);
+        //EditorGUILayout.FloatField("Memory Consumption time (ms)", gizmoDrawing.memoryConsumption);
         //DrawDefaultInspector(); // Draw all public variables
         EditorGUILayout.Space();
 
@@ -575,7 +575,7 @@ public class ScriptEditorCA : Editor
         gizmoDrawing.wallSizeThreshold = EditorGUILayout.IntSlider("Wall size - filtering", gizmoDrawing.wallSizeThreshold, 0, Mathf.Max(gizmoDrawing.widthMap, gizmoDrawing.heightMap));
         gizmoDrawing.roomSizeThreshold = EditorGUILayout.IntSlider("Room size - filtering", gizmoDrawing.roomSizeThreshold, 0, Mathf.Max(gizmoDrawing.widthMap, gizmoDrawing.heightMap));
 
-        if (GUILayout.Button("Generate cellular automata"))
+        if (GUILayout.Button("Generate cellular automata with seed"))
         {
             // Call the function
             gizmoDrawing.Generate(gizmoDrawing.seed); 
@@ -585,10 +585,10 @@ public class ScriptEditorCA : Editor
         {
             gizmoDrawing.Generate();
         }
-        if (GUILayout.Button("MeassureTime"))
-        {
-            gizmoDrawing.DataMeassure();
-        }
+        //if (GUILayout.Button("MeassureTime"))
+        //{
+        //    gizmoDrawing.DataMeassure();
+        //}
 
         if (GUI.changed)
             UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
